@@ -4,16 +4,33 @@ import { Document } from "mongoose";
 
 export type UserDocument = User & Document
 
-@Schema()
+@Schema({
+    toObject: {
+        transform: function (doc, ret) {
+          delete ret.password;
+          delete ret.__v;
+        }
+      },
+      toJSON: {
+        transform: function (doc, ret) {
+          delete ret.password;
+          delete ret.__v;
+
+        }
+      }
+})
 export class User
 {
-    @Prop({required:true})
+    @Prop({required:true,default:""})
     firstName:string;
 
-    @Prop({required:true})
+    @Prop({required:true,default:""})
     lastName:string;
 
-    @Prop({required:true})
+    @Prop({
+        required:true,
+        default:"",
+    })
     password:string;
 
     @Prop({
