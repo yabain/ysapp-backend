@@ -6,7 +6,23 @@ import { User } from "src/user/models";
 export type WalletDocument =  Wallet & Document;
 
 
-@Schema()
+@Schema({
+    toObject: {
+        transform: function (doc, ret) {
+            ret.owner=ret.owner._id;
+            ret.app=ret.app._id
+            delete ret.__v;
+        }
+    },
+    toJSON: {
+        transform: function (doc, ret) {
+            ret.owner=ret.owner._id;
+            ret.app=ret.app._id
+            delete ret.__v;
+
+        }
+    }
+})
 export class Wallet
 {
     @Prop({required:true,default:0})

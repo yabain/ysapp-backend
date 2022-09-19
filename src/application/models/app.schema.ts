@@ -5,7 +5,21 @@ import { User } from '../../user/models';
 
 export type ApplicationDocument =  Application & Document;
 
-@Schema()
+@Schema({
+    toObject: {
+        transform: function (doc, ret) {
+            ret.owner=ret.owner._id;
+            delete ret.__v;
+        }
+    },
+    toJSON: {
+        transform: function (doc, ret) {
+            ret.owner=ret.owner._id;
+            delete ret.__v;
+
+        }
+    }
+})
 export class Application
 {
 

@@ -21,6 +21,7 @@ export class ApplicationService
     {
         const transaction= await this.connection.startSession();
         transaction.startTransaction();
+        let wallet=null,appDocument=null;
         try
         {
             let app= new Application()
@@ -28,14 +29,12 @@ export class ApplicationService
             if(createappDTO.urlToCallBack) app.urlToCallBack=createappDTO.urlToCallBack;
             app.owner=await this.usersService.findOneByField({email:user.email});
             if(!app.owner) throw new NotFoundException();
-
-            let wallet=await this.walletService.create(app.owner,await new this.appModel(app).save({session:transaction}),transaction);
-            transaction.commitTransaction();
-            return {app,wallet}
+            appDocument=await new this.appModel(app).save({session:transaction})
+            wallet=await this.walletService.create(app.owner,appDocument,transaction);
+            await transaction.commitTransaction();
         }
         catch(err)
         {
-            console.log("Err ",err)
             await transaction.abortTransaction();
             throw err
         }
@@ -43,6 +42,7 @@ export class ApplicationService
         {
             transaction.endSession();
         }
+        return {app:appDocument,wallet}
     }
 
     async findAll(): Promise<ApplicationDocument[]>
