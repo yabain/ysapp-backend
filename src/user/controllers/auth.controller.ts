@@ -1,7 +1,7 @@
-import { Body, Controller,HttpCode,HttpStatus,Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller,HttpCode,HttpStatus,Post, Req, UseGuards,Get } from "@nestjs/common";
 import { Request } from "express";
 import { CreateUserDTO } from "../dtos";
-import { UserAuthGuard } from "../guards";
+import { UserAuthGuard, UserJwtAuthGuard } from "../guards";
 import { AuthService, UsersService } from "../services";
 
 @Controller("user/auth")
@@ -34,5 +34,19 @@ export class AuthController
 
             }
         }
+    }
+
+    @UseGuards(UserJwtAuthGuard)
+    @Get("refresh")
+    async refreshToken()
+    {
+
+    }
+
+    @UseGuards(UserJwtAuthGuard)
+    @Get("logout")
+    async logout()
+    {
+
     }
 }

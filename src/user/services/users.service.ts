@@ -10,29 +10,25 @@ export class UsersService
 {
     constructor(@InjectModel('User') private userModel:Model<UserDocument>){}
 
-    async create(createUserDTO: CreateUserDTO):Promise<User>
+    async create(createUserDTO: CreateUserDTO):Promise<UserDocument>
     {
         return new this.userModel(createUserDTO).save();
     }
 
-    async findAll(): Promise<User[]>
+    async findAll(): Promise<UserDocument[]>
     {
         return this.userModel.find().exec();
     }
 
-    async findByEmailAndPassword(userDTO:LoginUserDTO):Promise<User>
+ 
+    async findByField(userObj:Record<string,any>):Promise<UserDocument[]>
     {
-        return this.userModel.findOne<User>(userDTO).exec();
+        return this.userModel.find<UserDocument>(userObj).exec()
     }
 
-    async findByField(userObj:Record<string,any>):Promise<User[]>
+    async findOneByField(userObj:Record<string,any>):Promise<UserDocument>
     {
-        return this.userModel.find<User>(userObj).exec()
-    }
-
-    async findOneByField(userObj:Record<string,any>):Promise<User>
-    {
-        return this.userModel.findOne<User>(userObj).exec()
+        return this.userModel.findOne<UserDocument>(userObj).exec()
     }
     
 }

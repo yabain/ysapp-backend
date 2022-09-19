@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ApplicationModule } from './application/application.module';
 import configuration from './shared/config/configuration';
 import { UserModule } from './user/user.module';
 
@@ -12,9 +11,10 @@ import { UserModule } from './user/user.module';
       load: [configuration]
     }),
     MongooseModule.forRoot(process.env.MONGO_DATABASE_URL),
+    ApplicationModule,
     UserModule
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
