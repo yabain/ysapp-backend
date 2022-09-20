@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { uid } from "rand-token";
+import { v4 as uuidv4 } from 'uuid';
 import mongoose, { Document } from 'mongoose';
 import { User } from '../../user/models';
 
@@ -32,8 +33,8 @@ export class Application
     @Prop({type:mongoose.Schema.Types.ObjectId,ref:"User",required:true})
     owner:User;
 
-    @Prop({default:uid(256),required:true})
-    token:string;
+    @Prop({default:uuidv4(),required:true})
+    clientId:string;
 
     @Prop({default:uid(256),required:true})
     privateKey:string;

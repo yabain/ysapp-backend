@@ -54,6 +54,9 @@ export class User
 
     @Prop({require:true,enum:PERMISSIONS,default:PERMISSIONS.USER})
     permissions:string;
+
+    @Prop({default:Date.now(),required:true})
+    createdAt:Date
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

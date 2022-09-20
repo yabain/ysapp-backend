@@ -6,20 +6,22 @@ import { AuthBasicGuard } from "../guards/auth-basic.guard";
 import { ApplicationService, AuthService } from "../services";
 
 
-@Controller("apps")
-export class ApplicationController
+@Controller("apps/auth")
+export class AuthController
 {
     constructor(private appService:ApplicationService,private appAuthService:AuthService){}
 
-    @UseGuards(UserJwtAuthGuard)
-    @Post('create')
-    async createApp(@Req() request:Request, @Body() createAppDTO:CreateAppDTO)
+    
+
+    @Get('token')
+    @UseGuards(AuthBasicGuard)
+    async authApp(@Req() request:Request)
     {
-        
+        // request.headers.authorization
         return {
-            statusCode:HttpStatus.CREATED,
-            message:"The application was created successfully",
-            data: await this.appService.create(createAppDTO,request.user)
+            statusCode:HttpStatus.OK,
+            message:"Authentication Success",
+            data:this.appAuthService.createApiKey(request.user)
         }
     }
 }

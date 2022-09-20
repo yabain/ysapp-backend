@@ -33,6 +33,9 @@ export class Wallet
 
     @Prop({type:mongoose.Schema.Types.ObjectId,ref:"Application",required:true})
     app:Application;
+    
+    @Prop({default:Date.now(),required:true})
+    createdAt:Date
 }
 
 export const WalletSchema = SchemaFactory.createForClass(Wallet)
