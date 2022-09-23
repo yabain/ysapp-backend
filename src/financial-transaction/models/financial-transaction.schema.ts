@@ -8,7 +8,21 @@ import { Wallet } from "../../wallet/models";
 export type FinancialTransactionDocument =  FinancialTransaction & Document;
 
 
-@Schema()
+@Schema({
+    toObject: {
+        transform: function (doc, ret) {
+          delete ret.token;
+          delete ret.__v;
+        }
+      },
+      toJSON: {
+        transform: function (doc, ret) {
+          delete ret.token;
+          delete ret.__v;
+
+        }
+      }
+})
 export class FinancialTransaction
 {
     @Prop({required:true,enum:FinancialTransactionState,default:FinancialTransactionState.FINANCIAL_TRANSACTION_START})
@@ -49,9 +63,6 @@ export class FinancialTransaction
 
     @Prop({type:mongoose.Schema.Types.ObjectId,ref:Wallet.name, required:true})
     wallet:Wallet;
-
-    @Prop({required:true,default:uuidv4()})
-    token:string;
 }
 
 export const FinancialTransactionSchema = SchemaFactory.createForClass(FinancialTransaction)

@@ -42,6 +42,6 @@ export class FinancialTransactionService
 
     async update(filter:Record<string,any>,toUpdate:Record<string,any>,session=null)
     {
-        return this.financialTransactionModel.findOneAndUpdate(filter,toUpdate,{session});
+        return this.financialTransactionModel.findOneAndUpdate(filter,toUpdate,{session,new:true});
     }
 }

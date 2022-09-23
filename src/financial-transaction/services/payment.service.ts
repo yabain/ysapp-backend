@@ -1,9 +1,10 @@
-import { HttpException, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { FinancialPaymentService } from "src/financial-payment/services";
 import { CreateFinancialTransactionDTO } from "../dtos";
 import { FinancialTransactionService } from "./financial-transaction.service";
 import mongoose from "mongoose"
 import { InjectConnection } from "@nestjs/mongoose";
+import { FinancialTransactionState } from "../enum";
 
 @Injectable()
 export class PaymentService
@@ -31,24 +32,6 @@ export class PaymentService
         catch(err)
         {
             await transaction.abortTransaction();
-            // let error={}
-
-            // if(err.response)
-            // {
-            //     error={data:err.response.data,status:err.response.status}
-            // }
-            // else if (err.request)
-            // {
-            //     error={data:err.request,status:500}
-            // }
-            // else
-            // {
-            //     error={data:err.message,status:500}
-            // }
-
-            // // console.log("Error ",err)
-            // // throw new HttpException(error["data"], error["status"]);
-            // console.log("err",err.response.data)
             throw err
         }
         finally
@@ -56,5 +39,22 @@ export class PaymentService
             transaction.endSession();
         }     
         return  financialTransaction;
+    }
+
+    async checkPayment(financialTransactionRef)
+    {
+        let financialTransaction=await this.financialTransactionService.findOneByField({ref:financialTransactionRef})
+        if(!financialTransaction) throw new NotFoundException({
+            status:HttpStatus.NOT_FOUND,
+            message:`Transaction id ${financialTransactionRef} not found`
+        });
+        if(financialTransaction.state==FinancialTransactionState.FINANCIAL_TRANSACTION_ERROR || financialTransaction.state==FinancialTransactionState.FINANCIAL_TRANSACTION_SUCCESS)
+            return financialTransaction;
+            
+        financialTransaction= await this.financialTransactionService.update(
+            {_id:financialTransaction._id},
+            await this.paymentService.checkPaiement(financialTransaction),
+        );
+        return financialTransaction;
     }
 }

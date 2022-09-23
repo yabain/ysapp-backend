@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards,Req, HttpStatus } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards,Req, HttpStatus, Get, Param } from "@nestjs/common";
 import { Request } from "express";
 import { AuthJwtGuard as AppAuthJwtGuard } from "src/application/guards"
 import { CreateFinancialTransactionDTO } from "../dtos"
@@ -18,7 +18,18 @@ export class PaymentController
             statusCode:HttpStatus.CREATED,
             message:"Payment initiated with success",
             data
-        }
-        
+        }        
+    }
+
+    @UseGuards(AppAuthJwtGuard)
+    @Get("check/:ref")    
+    async checkPayment(@Req() request:Request, @Param("ref") ref:string)
+    {
+        let data=await this.paymentService.checkPayment(ref)
+        return {
+            statusCode:HttpStatus.OK,
+            message:"Payment details",
+            data
+        }        
     }
 }

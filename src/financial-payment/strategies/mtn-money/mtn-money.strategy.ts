@@ -42,7 +42,7 @@ export class MtnMoneyStrategyPayment implements PaymentMethodStrategy
     getResponseStatus(response):Record<string,any>
     {
         let r = {};
-        switch(response.data.status)
+        switch(response.status)
         {
             case MtnResponseStatus.SUCCESSFUL: 
                 r["status"] = FinancialTransactionState.FINANCIAL_TRANSACTION_SUCCESS
@@ -80,7 +80,6 @@ export class MtnMoneyStrategyPayment implements PaymentMethodStrategy
             this.getToken(this.configService.get<string>("MOMO_API_DEFAULT_UUID"))
             .then((result)=>{
                 token = result;
-
                 this.httpService.request({
                     url:`${this.configService.get<string>("MOMO_API_PATH")}/collection/v1_0/requesttopay`,
                     method:"post",
@@ -103,7 +102,10 @@ export class MtnMoneyStrategyPayment implements PaymentMethodStrategy
                     }
                 })
                 .subscribe(
-                    (data)=>resolve({ token,error:FinancialTransactionErrorType.NO_ERROR }),
+                    (data)=>{
+                        // console.log("data ",data)
+                        resolve({ error:FinancialTransactionErrorType.NO_ERROR })
+                    },
                     (error)=>{reject(error)}
                 )
             
@@ -115,35 +117,41 @@ export class MtnMoneyStrategyPayment implements PaymentMethodStrategy
         return new Promise((resolve,reject)=>{
             // console.log("Path ",`${this.path}/collection/v1_0/requesttopay/${financialTransaction.ref}`)
             // console.log("Token ",financialTransaction.token)
-            this.httpService.request({
-                url:`${this.configService.get<string>("MOMO_API_PATH")}/collection/v1_0/requesttopay/${financialTransaction.ref}`,
-                method:"get",
-                headers:{
-                    Authorization: `Bearer ${financialTransaction.token}`,
-                    "X-Reference-Id":financialTransaction.ref,
-                    "Ocp-Apim-Subscription-Key":this.configService.get<string>("MOMO_API_PRIMARY_KEY"),
-                    "X-Target-Environment":this.configService.get<string>("MOMO_API_MODE_ENV"),
-                },
-            })
-            .subscribe(
-                (response)=>resolve({ endDate:new Date().toISOString(),...this.getResponseStatus(response.data) }),
-                (error)=>{
-                    let resultCode = null;
-                    switch(error.status)
-                    {
-                        case 400:
-                            return resolve({endDate:new Date().toISOString(),...this.getResponseStatus(error.data)});
-                        case 404:
-                            resultCode=ERROR_CODE.RESSOURCE_NOT_FOUND_ERROR;
-                            break;
-                        default:
-                            resultCode=ERROR_CODE.UNKNOW_ERROR;
+            this.getToken(this.configService.get<string>("MOMO_API_DEFAULT_UUID"))
+            .then((result)=>{
+                this.httpService.request({
+                    url:`${this.configService.get<string>("MOMO_API_PATH")}/collection/v1_0/requesttopay/${financialTransaction.ref}`,
+                    method:"get",
+                    headers:{
+                        Authorization: `Bearer ${result}`,
+                        "X-Reference-Id":financialTransaction.ref,
+                        "Ocp-Apim-Subscription-Key":this.configService.get<string>("MOMO_API_PRIMARY_KEY"),
+                        "X-Target-Environment":this.configService.get<string>("MOMO_API_MODE_ENV"),
+                    },
+                })
+                .subscribe(
+                    (response)=>{
+                        resolve({ endDate:new Date().toISOString(),...this.getResponseStatus(response.data) })
+                    },
+                    (error)=>{
+                        let resultCode = null;
+                        switch(error.status)
+                        {
+                            case 400:
+                                return resolve({endDate:new Date().toISOString(),...this.getResponseStatus(error.data)});
+                            case 404:
+                                resultCode=ERROR_CODE.RESSOURCE_NOT_FOUND_ERROR;
+                                break;
+                            default:
+                                resultCode=ERROR_CODE.UNKNOW_ERROR;
+                        }
+                        console.log(error)
+                        reject(resultCode)
                     }
-                    console.log(error.response.data)
-                    reject(resultCode)
-                }
-            )
-        })
+                )
+            })
+            .catch((error)=>reject(error))
+        });
     }
     cancel(financialTransaction: FinancialTransaction): Promise<any> {
         throw new Error("Method not implemented.");
@@ -153,7 +161,7 @@ export class MtnMoneyStrategyPayment implements PaymentMethodStrategy
         return new Promise((resolve,reject)=>{
             let token="";
             let uuid = uuidv4();
-            this.getToken(uuid) //this.configService.get<string>("MOMO_API_DEFAULT_UUID")
+            this.getToken(this.configService.get<string>("MOMO_API_DEFAULT_UUID")) //
             .then((result)=>{
                 token = result;
 
@@ -162,7 +170,7 @@ export class MtnMoneyStrategyPayment implements PaymentMethodStrategy
                     method:"post",
                     headers:{
                         Authorization: `Bearer ${token}`,
-                        "X-Reference-Id":uuid,
+                        "X-Reference-Id":financialTransaction.ref,
                         "Ocp-Apim-Subscription-Key":this.configService.get<string>("MOMO_API_PRIMARY_KEY"),
                         "X-Target-Environment":this.configService.get<string>("MOMO_API_MODE_ENV"),
                     },
@@ -172,7 +180,7 @@ export class MtnMoneyStrategyPayment implements PaymentMethodStrategy
                         "externalId": financialTransaction.ref,
                         "payer": {
                             "partyIdType": "MSISDN",
-                            "partyId": financialTransaction.userRef
+                            "partyId": financialTransaction.userRef.account
                         },
                         "payerMessage": `Une transaction de ${financialTransaction.amount} ${financialTransaction.moneyCode} a été fait depuis votre compte`,
                         "payeeNote": `Une transaction de ${financialTransaction.amount} ${financialTransaction.moneyCode} a été fait vers votre compte`
@@ -183,7 +191,9 @@ export class MtnMoneyStrategyPayment implements PaymentMethodStrategy
                 )
                 .subscribe(
                     (data)=>resolve({ token,error:FinancialTransactionErrorType.NO_ERROR }),
-                    (error)=>{reject(error)}
+                    (error)=>{
+                        reject(error)
+                    }
                 )
             
             })
@@ -193,51 +203,58 @@ export class MtnMoneyStrategyPayment implements PaymentMethodStrategy
 
     checkWithdrawal(financialTransaction: FinancialTransaction): Promise<any> {
         return new Promise((resolve,reject)=>{
-            this.httpService.request({
-                url:`${this.configService.get<string>("MOMO_API_PATH")}/collection/v1_0/requesttowithdraw/${financialTransaction.ref}`,
-                method:"post",
-                headers:{
-                    Authorization: `Bearer ${financialTransaction.token}`,
-                    "X-Reference-Id":financialTransaction.ref,
-                    "Ocp-Apim-Subscription-Key":this.configService.get<string>("MOMO_API_PRIMARY_KEY"),
-                    "X-Target-Environment":this.configService.get<string>("MOMO_API_MODE_ENV"),
-                }
+            this.getToken(this.configService.get<string>("MOMO_API_DEFAULT_UUID"))
+            .then((result)=>{
+                this.httpService.request({
+                    url:`${this.configService.get<string>("MOMO_API_PATH")}/collection/v1_0/requesttowithdraw/${financialTransaction.ref}`,
+                    method:"get",
+                    headers:{
+                        Authorization: `Bearer ${result}`,
+                        "X-Reference-Id":financialTransaction.ref,
+                        "Ocp-Apim-Subscription-Key":this.configService.get<string>("MOMO_API_PRIMARY_KEY"),
+                        "X-Target-Environment":this.configService.get<string>("MOMO_API_MODE_ENV"),
+                    }
+                })
+                .subscribe(
+                    (response)=>{
+                    let r = { endDate:new Date().toISOString() };
+
+                    switch(response.data.status)
+                    {
+                        case MtnResponseStatus.SUCCESSFUL: 
+                            r["status"] = FinancialTransactionState.FINANCIAL_TRANSACTION_SUCCESS
+                            r["error"] = FinancialTransactionErrorType.NO_ERROR
+                            break;
+                        case MtnResponseStatus.FAILED:
+                            switch(response.data.reason.code)
+                            {
+                                case MtnResponseStatus.PAYER_NOT_FOUND:
+                                    r["status"] = FinancialTransactionState.FINANCIAL_TRANSACTION_ERROR
+                                    r["error"] = FinancialTransactionErrorType.BUYER_NOT_FOUND_ERROR
+                                    break;
+
+                                case MtnResponseStatus.PAYEE_NOT_FOUND:
+                                    r["status"] = FinancialTransactionState.FINANCIAL_TRANSACTION_SUCCESS
+                                    r["error"] = FinancialTransactionErrorType.RECEIVER_NOT_FOUND_ERROR
+                                    break;
+                                default:
+                                    r["status"]=FinancialTransactionState.FINANCIAL_TRANSACTION_ERROR;
+                                    r["error"] = FinancialTransactionErrorType.UNKNOW_ERROR
+                            }
+                            break;
+                        case MtnResponseStatus.PENDING:
+                            r["status"] = FinancialTransactionState.FINANCIAL_TRANSACTION_PENDING
+                            r["error"] = FinancialTransactionErrorType.NO_ERROR
+                    }
+                    resolve(r)
+                    },
+                    (error)=>{
+                        console.log("Error ",error)
+                        reject(error)
+                    }
+                )           
             })
-            .subscribe(
-                (response)=>{
-                let r = { endDate:new Date().toISOString() };
-
-                switch(response.data.status)
-                {
-                    case MtnResponseStatus.SUCCESSFUL: 
-                        r["status"] = FinancialTransactionState.FINANCIAL_TRANSACTION_SUCCESS
-                        r["error"] = FinancialTransactionErrorType.NO_ERROR
-                        break;
-                    case MtnResponseStatus.FAILED:
-                        switch(response.data.reason.code)
-                        {
-                            case MtnResponseStatus.PAYER_NOT_FOUND:
-                                r["status"] = FinancialTransactionState.FINANCIAL_TRANSACTION_ERROR
-                                r["error"] = FinancialTransactionErrorType.BUYER_NOT_FOUND_ERROR
-                                break;
-
-                            case MtnResponseStatus.PAYEE_NOT_FOUND:
-                                r["status"] = FinancialTransactionState.FINANCIAL_TRANSACTION_SUCCESS
-                                r["error"] = FinancialTransactionErrorType.RECEIVER_NOT_FOUND_ERROR
-                                break;
-                            default:
-                                r["status"]=FinancialTransactionState.FINANCIAL_TRANSACTION_ERROR;
-                                r["error"] = FinancialTransactionErrorType.UNKNOW_ERROR
-                        }
-                        break;
-                    case MtnResponseStatus.PENDING:
-                        r["status"] = FinancialTransactionState.FINANCIAL_TRANSACTION_PENDING
-                        r["error"] = FinancialTransactionErrorType.NO_ERROR
-                }
-                resolve(r)
-                },
-                (error)=>{reject(error)}
-            )           
+            .catch((error)=>reject(error))
         })
     }
 

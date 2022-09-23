@@ -12,14 +12,16 @@ export class FinancialPaymentService
         return new Promise<any>((resolve,reject)=>{
             if(!Object.values(PaymentStrategyType).includes(financialTransaction.paymentMode)) return Promise.reject(FinancialTransactionErrorType.PAIMENT_METHOD_NOT_FOUND);
 
-            this.paymentBuilder.getMethodPayment(financialTransaction.paymentMode )
-            .buy(financialTransaction)
-            .then((result)=>{
+            let paymentMethod=financialTransaction.type==FinancialTransactionType.DEPOSIT
+                                ?this.paymentBuilder.getMethodPayment(financialTransaction.paymentMode ).buy(financialTransaction)
+                                :this.paymentBuilder.getMethodPayment(financialTransaction.paymentMode ).withdrawal(financialTransaction);
+
+            paymentMethod.then((result)=>{
                 financialTransaction.state=FinancialTransactionState.FINANCIAL_TRANSACTION_PENDING;
                 financialTransaction.startDate=new Date().toISOString();
-                financialTransaction.token=result.token;
                 financialTransaction.error=result.error;
                 financialTransaction.endDate="";
+                console.log("Transaction ",financialTransaction)
                 resolve(financialTransaction)
             })
             .catch((error)=> {
