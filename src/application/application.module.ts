@@ -17,6 +17,6 @@ import { BasicStrategy } from "./stategies";
     ],
     controllers:[ApplicationController,AuthController],
     providers:[ApplicationService,BasicStrategy,AuthService],
-    exports:[ApplicationService]
+    exports:[ApplicationService,BasicStrategy,AuthService]
 })
 export class ApplicationModule{}

@@ -18,7 +18,7 @@ export class FinancialTransaction
     startDate:string;
 
     @Prop({required:true,type:Date,default:Date.now})
-    endDate:String="";
+    endDate:String;
 
     @Prop({required:true,default:0})
     amount:number;
@@ -33,9 +33,9 @@ export class FinancialTransaction
     error:FinancialTransactionErrorType;
 
     @Prop({required:true,enum:PaymentStrategyType,default:PaymentStrategyType.BANK})
-    paiementMode:PaymentStrategyType;
+    paymentMode:PaymentStrategyType;
 
-    @Prop({type:mongoose.Schema.Types.ObjectId,ref:"Application", required:true})
+    @Prop({type:mongoose.Schema.Types.ObjectId,ref:Application.name, required:true})
     application:Application;
 
     @Prop({required:true,enum:PaymentMoneyCode,default:PaymentMoneyCode.XAF})
@@ -43,12 +43,15 @@ export class FinancialTransaction
 
     @Prop(raw({
         fullName:{type:String},
-        account:{type:String}
+        account:{type:Object}
     }))
     userRef:Record<string,any>;
 
-    @Prop({type:mongoose.Schema.Types.ObjectId,ref:"Wallet", required:true})
-    wallet:Wallet
+    @Prop({type:mongoose.Schema.Types.ObjectId,ref:Wallet.name, required:true})
+    wallet:Wallet;
+
+    @Prop({required:true,default:uuidv4()})
+    token:string;
 }
 
 export const FinancialTransactionSchema = SchemaFactory.createForClass(FinancialTransaction)

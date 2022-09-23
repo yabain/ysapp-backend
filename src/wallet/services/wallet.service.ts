@@ -10,6 +10,11 @@ export class WalletService
 {
     constructor(@InjectModel('Wallet') private walletModel:Model<WalletDocument>){}
 
+    getInstance(jsonObj)
+    {
+        return new this.walletModel(jsonObj)
+    }
+
     create(user,application:Application,transaction: mongoose.ClientSession | null = null)
     {
         return new this.walletModel({
@@ -17,5 +22,10 @@ export class WalletService
             owner:user,
             app:application
         }).save({session:transaction})
+    }
+
+    async findOneByField(walletObj:Record<string,any>):Promise<WalletDocument>
+    {
+        return this.walletModel.findOne<WalletDocument>(walletObj).exec()
     }
 }

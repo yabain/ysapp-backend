@@ -1,5 +1,9 @@
-import {MaxLength,Min,IsEnum,IsNumberString,IsMongoId, MinLength,IsString,IsOptional,IsUrl,IsNotEmpty, IsJSON } from "class-validator";
+import { Type } from "class-transformer";
+import {MaxLength,Min,IsEnum,IsNumberString,IsMongoId, MinLength,IsString,IsOptional,IsUrl,IsNotEmpty, IsJSON, IsNumber, IsDefined, IsNotEmptyObject } from "class-validator";
+import { Application } from "src/application/models";
+import { Wallet } from "src/wallet/models";
 import { FinancialTransactionState, FinancialTransactionType, PaymentMoneyCode, PaymentStrategyType } from "../enum";
+import { UserRefDTO } from "./user-ref.dto";
 
 
 
@@ -7,7 +11,7 @@ export class CreateFinancialTransactionDTO
 {
 
     @Min(1)
-    @IsNumberString()
+    @IsNumber()
     amount:number;
 
     @IsNotEmpty()
@@ -17,23 +21,24 @@ export class CreateFinancialTransactionDTO
    
     @IsNotEmpty()
     @IsEnum(PaymentStrategyType)
-    paiementMode:PaymentStrategyType;
+    paymentMode:PaymentStrategyType;
 
     @IsOptional()
     @IsEnum(FinancialTransactionState)
     state:FinancialTransactionState;
 
-    @IsMongoId()
-    application:string;
-
     @IsEnum(PaymentMoneyCode)
-    moneyCode:string;
+    moneyCode:PaymentMoneyCode;
 
-    @IsJSON()
-    userRef:{
-        fullName:String,
-        account: String
-    };
+    @IsDefined()
+    @IsNotEmptyObject()
+    @Type(()=> UserRefDTO)
+    userRef;
+
+    //Invalidate
+    application:Application;
+
+    wallet:Wallet;
 
 
 }

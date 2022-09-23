@@ -17,6 +17,11 @@ export class ApplicationService
         @InjectConnection() private readonly connection:mongoose.Connection
     ){}
 
+    getInstance(jsonObj)
+    {
+        return new this.appModel(jsonObj)
+    }
+
     async create(createappDTO: CreateAppDTO,user):Promise<{app:Application,wallet:Wallet}>
     {
         const transaction= await this.connection.startSession();
@@ -55,8 +60,8 @@ export class ApplicationService
         return this.appModel.find<ApplicationDocument>(appObj).exec()
     }
 
-    async findOneByField(appObj:Record<string,any>):Promise<ApplicationDocument>
+    async findOneByField(appObj:Record<string,any>):Promise<Application>
     {
-        return this.appModel.findOne<ApplicationDocument>(appObj).exec()
+        return this.appModel.findOne<Application>(appObj).exec()
     }
 }

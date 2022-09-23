@@ -1,10 +1,23 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
+import { ApplicationModule } from "src/application/application.module";
+import { FinancialPaymentModule } from "src/financial-payment/financial-payment.module";
+import { WalletModule } from "src/wallet/wallet.module";
+import { PaymentController } from "./controllers";
 import { FinancialTransaction, FinancialTransactionSchema } from "./models";
+import { FinancialTransactionService, PaymentService } from "./services";
 
 @Module({
-    imports:[MongooseModule.forFeature([{name:FinancialTransaction.name,schema:FinancialTransactionSchema}])],
-    controllers:[],
-    providers:[]
+    imports:[
+        MongooseModule.forFeature([{name:FinancialTransaction.name,schema:FinancialTransactionSchema}]),
+        ApplicationModule,
+        FinancialPaymentModule,
+        WalletModule
+    ],
+    controllers:[PaymentController],
+    providers:[
+        FinancialTransactionService,
+        PaymentService
+    ]
 })
 export class FinancialTransactionModule{}
