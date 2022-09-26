@@ -21,7 +21,6 @@ export class FinancialPaymentService
                 financialTransaction.startDate=new Date().toISOString();
                 financialTransaction.error=result.error;
                 financialTransaction.endDate="";
-                console.log("Transaction ",financialTransaction)
                 resolve(financialTransaction)
             })
             .catch((error)=> {

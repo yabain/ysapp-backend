@@ -6,6 +6,7 @@ import { WalletModule } from "src/wallet/wallet.module";
 import { PaymentController } from "./controllers";
 import { FinancialTransaction, FinancialTransactionSchema } from "./models";
 import { FinancialTransactionService, PaymentService } from "./services";
+import { DecreaseAmountValidator } from "./validators";
 
 @Module({
     imports:[
@@ -17,7 +18,8 @@ import { FinancialTransactionService, PaymentService } from "./services";
     controllers:[PaymentController],
     providers:[
         FinancialTransactionService,
-        PaymentService
+        PaymentService,
+        DecreaseAmountValidator
     ]
 })
 export class FinancialTransactionModule{}
