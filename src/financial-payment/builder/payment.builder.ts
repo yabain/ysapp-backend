@@ -2,12 +2,14 @@ import { Injectable } from "@nestjs/common"
 import { PaymentStrategyType } from "src/financial-transaction/enum";
 import { PaymentMethodStrategy } from "../interfaces";
 import { MtnMoneyStrategyPayment } from "../strategies/mtn-money";
+import { OrangeMoneyStrategyPayment } from "../strategies/orange-money";
 
 @Injectable()
 export class PaymentBuilder
 {
     constructor(
-        private mtnMoneyStrategyPayment:MtnMoneyStrategyPayment
+        private mtnMoneyStrategyPayment:MtnMoneyStrategyPayment,
+        private orangeMoneyStrategyPayment:OrangeMoneyStrategyPayment
     ){}
     getMethodPayment(method:PaymentStrategyType):PaymentMethodStrategy
     {
@@ -19,9 +21,9 @@ export class PaymentBuilder
             case PaymentStrategyType.MTN_MONEY:
                 paiementMethodStrategi=this.mtnMoneyStrategyPayment;
                 break
-            // case PaiementStrategyType.ORANGE_MONEY:
-            //     paiementMethodStrategi=new OrangeMoneyStrategyPayement();
-            //     break
+            case PaymentStrategyType.ORANGE_MONEY:
+                paiementMethodStrategi=this.orangeMoneyStrategyPayment
+                break
             
         }
         return paiementMethodStrategi

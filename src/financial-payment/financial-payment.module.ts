@@ -4,6 +4,7 @@ import { ConfigModule } from "@nestjs/config";
 import { PaymentBuilder } from "./builder/payment.builder";
 import { FinancialPaymentService } from "./services";
 import { MtnMoneyStrategyPayment } from "./strategies/mtn-money";
+import { OrangeMoneyStrategyPayment } from "./strategies/orange-money";
 
 @Module({
     imports:[
@@ -12,6 +13,7 @@ import { MtnMoneyStrategyPayment } from "./strategies/mtn-money";
     providers:[
         FinancialPaymentService,
         MtnMoneyStrategyPayment,
+        OrangeMoneyStrategyPayment,
         PaymentBuilder,
     ],
     exports:[ FinancialPaymentService ]
