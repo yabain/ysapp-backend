@@ -1,1 +1,1 @@
-export * from "./finance.enum"
+export * from "./transaction.enum"

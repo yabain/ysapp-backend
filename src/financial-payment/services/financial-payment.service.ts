@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common"
-import { FinancialTransactionErrorType, FinancialTransactionState, FinancialTransactionType, PaymentStrategyType } from "src/financial-transaction/enum";
+import { FinancialTransactionErrorType, FinancialTransactionState} from "src/financial-transaction/enum";
 import { FinancialTransaction } from "src/financial-transaction/models";
 import { PaymentBuilder } from "../builder/payment.builder";
+import { FinancialTransactionType, PaymentStrategyType } from "../enum";
 
 @Injectable()
 export class FinancialPaymentService
@@ -21,6 +22,7 @@ export class FinancialPaymentService
                 financialTransaction.startDate=new Date().toISOString();
                 financialTransaction.error=result.error;
                 financialTransaction.endDate="";
+                // if(result.token) financialTransaction.token=result.token
                 resolve(financialTransaction)
             })
             .catch((error)=> {

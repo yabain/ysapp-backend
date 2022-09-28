@@ -1,9 +1,10 @@
 import { Prop, Schema,raw, SchemaFactory } from "@nestjs/mongoose";
 import mongoose , { Document } from "mongoose";
 import { v4 as uuidv4 } from 'uuid';
-import { FinancialTransactionErrorType, FinancialTransactionState, FinancialTransactionType, PaymentMoneyCode, PaymentStrategyType } from "./../enum";
+import { FinancialTransactionErrorType, FinancialTransactionState } from "../enum";
 import { Application } from "../../application/models";
 import { Wallet } from "../../wallet/models";
+import { FinancialTransactionType, PaymentStrategyType, PaymentMoneyCode } from "src/financial-payment/enum";
 
 export type FinancialTransactionDocument =  FinancialTransaction & Document;
 
@@ -63,6 +64,9 @@ export class FinancialTransaction
 
     @Prop({type:mongoose.Schema.Types.ObjectId,ref:Wallet.name, required:true})
     wallet:Wallet;
+
+    @Prop({default:Date.now(),required:true})
+    createdAt:Date
 }
 
 export const FinancialTransactionSchema = SchemaFactory.createForClass(FinancialTransaction)

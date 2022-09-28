@@ -58,7 +58,7 @@ export class OrangeMoneyStrategyPayment implements PaymentMethodStrategy
                 .subscribe(
                     (data)=>{
                         // console.log("data ",data)
-                        resolve({ error:FinancialTransactionErrorType.NO_ERROR })
+                        resolve({ error:FinancialTransactionErrorType.NO_ERROR,token })
                     },
                     (error)=>{reject(error)}
                 )
@@ -66,6 +66,13 @@ export class OrangeMoneyStrategyPayment implements PaymentMethodStrategy
             })
             .catch((error)=>  reject(error))
         }) 
+    }
+
+    openUserPrompt(financialTransaction)
+    {
+        this.httpService.request({
+            url:`${this.configService.get<string>("OM_API_PATH")}/mp/push/${financialTransaction.token}`,
+        })
     }
 
     check(financialTransaction: FinancialTransaction) {

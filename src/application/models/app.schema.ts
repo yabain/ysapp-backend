@@ -30,7 +30,7 @@ export class Application
     @Prop({default:""})
     urlToCallBack:string;
 
-    @Prop({type:mongoose.Schema.Types.ObjectId,ref:"User",required:true})
+    @Prop({type:mongoose.Schema.Types.ObjectId,ref:User.name,required:true})
     owner:User;
 
     @Prop({default:uuidv4(),required:true})

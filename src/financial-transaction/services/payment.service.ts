@@ -4,8 +4,9 @@ import { CreateFinancialTransactionDTO } from "../dtos";
 import { FinancialTransactionService } from "./financial-transaction.service";
 import mongoose from "mongoose"
 import { InjectConnection } from "@nestjs/mongoose";
-import { FinancialTransactionState, FinancialTransactionType } from "../enum";
+import { FinancialTransactionState } from "../enum";
 import { WalletService } from "src/wallet/services";
+import { FinancialTransactionType } from "src/financial-payment/enum";
 
 @Injectable()
 export class PaymentService

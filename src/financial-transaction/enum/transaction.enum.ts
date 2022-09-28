@@ -6,11 +6,7 @@ export enum FinancialTransactionState
     FINANCIAL_TRANSACTION_START="financial_transaction_start",
 }
 
-export enum FinancialTransactionType
-{
-    DEPOSIT="deposit",
-    WITHDRAW="withdraw"
-}
+
 
 export enum FinancialTransactionErrorType
 {
@@ -21,20 +17,4 @@ export enum FinancialTransactionErrorType
     INSUFFICIENT_AMOUNT_ERROR=-204,
     PAIMENT_METHOD_NOT_FOUND=-205,
     INVALID_AMOUNT_ERROR=-206
-}
-
-export enum PaymentStrategyType
-{
-    BANK="bank",
-    ORANGE_MONEY="ORANGE",
-    MTN_MONEY="MTN",
-    CREDIT_CARD="credit_card"
-}
-
-export enum PaymentMoneyCode
-{
-    XAF="XAF",
-    FCFA="XAF",
-    EUR="EUR",
-    $="$"
 }

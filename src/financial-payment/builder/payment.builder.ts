@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common"
-import { PaymentStrategyType } from "src/financial-transaction/enum";
+import { PaymentStrategyType } from "../enum";
 import { PaymentMethodStrategy } from "../interfaces";
 import { MtnMoneyStrategyPayment } from "../strategies/mtn-money";
 import { OrangeMoneyStrategyPayment } from "../strategies/orange-money";

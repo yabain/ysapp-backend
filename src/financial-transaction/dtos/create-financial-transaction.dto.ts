@@ -1,9 +1,10 @@
 import { Type } from "class-transformer";
 import {MaxLength,Min,IsEnum,IsNumberString,IsMongoId, MinLength,IsString,IsOptional,IsUrl,IsNotEmpty, IsJSON, IsNumber, IsDefined, IsNotEmptyObject } from "class-validator";
 import { Application } from "src/application/models";
+import { FinancialTransactionType, PaymentStrategyType, PaymentMoneyCode } from "src/financial-payment/enum";
 import { Wallet } from "src/wallet/models";
 import { IsValidAmount } from "../decorators/decrease-amount.decorator";
-import { FinancialTransactionState, FinancialTransactionType, PaymentMoneyCode, PaymentStrategyType } from "../enum";
+import { FinancialTransactionState } from "../enum";
 import { UserRefDTO } from "./user-ref.dto";
 
 
