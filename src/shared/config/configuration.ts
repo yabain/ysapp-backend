@@ -2,6 +2,7 @@
 export default () => ({
     port: parseInt(process.env.PORT, 10) || 3000,
     mongoURI: process.env.MONGO_DATABASE_URL,
+    NODE_ENV:process.env.NODE_ENV,
 
     //MOMO API
     MOMO_API_DEFAULT_UUID:process.env.MOMO_API_DEFAULT_UUID,  
