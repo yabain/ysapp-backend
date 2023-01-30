@@ -43,7 +43,6 @@ export class EncryptionSecurityService
         // let plainText = decipher.update(cipherText) + decipher.final();
         let plainText = Buffer.concat([decipher.update(cipherText) , decipher.final()]);
         return plainText.toString();
-
     }
 
 }
