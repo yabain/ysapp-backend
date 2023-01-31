@@ -2,8 +2,8 @@ import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
-import { AuthController } from "./controllers";
-import { User, UserSchema } from "./models";
+import { AuthController, UserProfilController } from "./controllers";
+import { User, UserDocument, UserSchema } from "./models";
 import { AuthService, UsersService } from "./services";
 import { AuthLocalStrategy } from "./strategies";
 import { PasswordUtil } from "./utils";
@@ -31,7 +31,7 @@ import { AuthJwtStrategy } from "./strategies/auth-jwt.strategy";
             signOptions: { expiresIn: JWT_CONSTANT.expiresIn }
         })
     ],
-    controllers:[AuthController],
+    controllers:[AuthController,UserProfilController],
     providers:[UsersService,AuthService,AuthLocalStrategy,AuthJwtStrategy],
     exports:[UsersService,AuthService,AuthJwtStrategy,JwtModule]
 })

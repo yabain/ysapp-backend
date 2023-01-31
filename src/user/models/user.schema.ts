@@ -1,8 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { PERMISSIONS } from "../enum";
-import { Document } from "mongoose";
+import mongoose, { Document, HydratedDocument } from "mongoose";
+import { Contact } from "src/contact/models";
 
-export type UserDocument = User & Document
+export type UserDocument = HydratedDocument<User>;
 
 @Schema({
     toObject: {
@@ -40,7 +41,7 @@ export class User
     })
     email:string;
 
-    @Prop({required:true,default:false})
+    @Prop({required:true,default:true})
     emailConfirmed:boolean;
 
     @Prop({default:""})
@@ -52,8 +53,17 @@ export class User
     @Prop({default:""})
     location:string;
 
+    @Prop({default:""})
+    phoneNumber:string;
+
     @Prop({require:true,enum:PERMISSIONS,default:PERMISSIONS.USER})
     permissions:string;
+
+    @Prop({type:[{type:mongoose.Schema.Types.ObjectId,ref:Contact.name}]})
+    contacts:Contact[];
+
+    @Prop({default:false})
+    isDeleted:boolean;
 
     @Prop({default:Date.now(),required:true})
     createdAt:Date

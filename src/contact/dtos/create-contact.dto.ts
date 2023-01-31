@@ -1,7 +1,7 @@
-import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, Matches, IsPhoneNumber } from "class-validator";
+import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, Matches, IsPhoneNumber, IsMobilePhone, IsFQDN } from "class-validator";
 
 
-export class CreateUserDTO
+export class CreateContactDTO
 {
     @IsNotEmpty()
     @MinLength(4)
@@ -14,12 +14,6 @@ export class CreateUserDTO
     @IsString()
     @MaxLength(65)
     lastName:string;
-
-    @IsNotEmpty()
-    @MinLength(8)
-    @IsString()
-    @Matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})")
-    password:string;
 
     @IsNotEmpty()
     @IsString()
@@ -38,11 +32,26 @@ export class CreateUserDTO
     country:string;
 
     @IsOptional()
+    @IsMobilePhone()
+    whatsappContact:string;
+
+    @IsOptional()
+    @MinLength(4)
+    @IsString()
+    @MaxLength(65)
+    skype:string;
+
+    @IsOptional()
+    @IsFQDN()
+    websiteLink:string;
+
+    @IsOptional()
     @MinLength(4)
     @IsString()
     location:string;
 
     @IsOptional()
-    @IsPhoneNumber()
+    @IsMobilePhone()
     phoneNumber:string
+
 }
