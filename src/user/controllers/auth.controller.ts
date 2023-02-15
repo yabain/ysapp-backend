@@ -31,7 +31,6 @@ export class AuthController
             data:{
                 ...this.authService.login(request.user),
                 user:request.user
-
             }
         }
     }

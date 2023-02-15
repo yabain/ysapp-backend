@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { PERMISSIONS } from "../enum";
 import mongoose, { Document, HydratedDocument } from "mongoose";
 import { Contact } from "src/contact/models";
+import { Group } from "src/group/models/group.schema";
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -61,6 +62,9 @@ export class User
 
     @Prop({type:[{type:mongoose.Schema.Types.ObjectId,ref:Contact.name}]})
     contacts:Contact[];
+
+    @Prop({type:[{type:mongoose.Schema.Types.ObjectId,ref:Group.name}]})
+    groups:Group[];
 
     @Prop({default:false})
     isDeleted:boolean;

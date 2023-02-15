@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document, HydratedDocument } from "mongoose";
+import mongoose, { Document, HydratedDocument } from "mongoose";
 
 
 export type ContactDocument = HydratedDocument<Contact>;
 
 @Schema({})
-export class Contact
+export class Contact extends Document
 {
     @Prop({required:true,default:""})
     firstName:string;
@@ -15,7 +15,6 @@ export class Contact
 
     @Prop({
         required:true,
-        unique:true,
         match:/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     })
     email:string;
@@ -41,6 +40,8 @@ export class Contact
     @Prop({default:""})
     location:string;
 
+    @Prop({type:[{type:mongoose.Schema.Types.ObjectId,ref:'Group'}]})
+    groups:any[]
 
     @Prop({default:Date.now(),required:true})
     createdAt:Date
