@@ -11,7 +11,7 @@ export type GroupDocument = HydratedDocument<Group>;
       },
       toJSON: {
         transform: function (doc, ret) {
-          delete ret.__v;
+      delete ret.__v;
 
         }
       }
