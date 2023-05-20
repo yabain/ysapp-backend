@@ -4,8 +4,11 @@ import { Request } from "express"
 import { UserAuthGuard, UserJwtAuthGuard } from "../guards";
 import { UpdateUserDTO } from "../dtos";
 import { UsersService } from "../services";
+import { Resource, Scopes } from "nest-keycloak-connect";
+import { User } from "../models";
 
-@UseGuards(UserJwtAuthGuard)
+// @UseGuards(UserJwtAuthGuard)
+@Resource(User.name)
 @Controller("/user/profil")
 export class UserProfilController
 {
@@ -39,8 +42,8 @@ export class UserProfilController
      * @apiError (Error 4xx) 404-NotFound User not found
      * @apiUse apiError
      */
-
     @Get(":id")
+    @Scopes("View")
     async getUserProfilById( @Param("id",ObjectIDValidationPipe) id:string)
     {
         let data = await this.userService.findOneByField({"_id":id})

@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/axios": "^0.1.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
@@ -35,8 +36,10 @@
     "class-validator": "^0.13.2",
     "cron": "^2.2.0",
     "env-cmd": "^10.1.0",
+    "keycloak-connect": "^20.0.5",
     "mongoose": "^6.5.4",
     "mongoose-autopopulate": "^0.17.1",
+    "nest-keycloak-connect": "^1.9.1",
     "passport": "^0.6.0",
     "passport-http": "^0.3.0",
     "passport-jwt": "^4.0.0",
