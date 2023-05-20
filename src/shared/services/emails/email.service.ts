@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { AwsEmailService } from "./aws-email.service";
 
 import { Email } from "./email";
 import { GmailEmailService } from "./gmail-email.service";
@@ -8,13 +7,12 @@ import { GmailEmailService } from "./gmail-email.service";
 export class EmailService
 {
     constructor(
-        private awsEmailService:AwsEmailService,
         private gmailEmailService:GmailEmailService
     ){}
 
     sendEmailWithAwsSES(emailObj:Email)
     {
-        return this.awsEmailService.sendEmail(emailObj)
+        // return this.awsEmailService.sendEmail(emailObj)
     }
 
     async sendEmailWithGmail(emailObj:Email)

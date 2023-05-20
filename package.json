@@ -36,6 +36,7 @@
     "class-validator": "^0.13.2",
     "cron": "^2.2.0",
     "env-cmd": "^10.1.0",
+    "googleapis": "^118.0.0",
     "keycloak-connect": "^20.0.5",
     "mongoose": "^6.5.4",
     "mongoose-autopopulate": "^0.17.1",

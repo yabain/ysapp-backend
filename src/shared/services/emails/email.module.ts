@@ -3,7 +3,6 @@ import { Module } from "@nestjs/common"
 import { EmailService } from "./email.service";
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { AwsEmailService } from "./aws-email.service";
 import { GmailEmailService } from "./gmail-email.service";
 
 
@@ -28,7 +27,6 @@ import { GmailEmailService } from "./gmail-email.service";
         })
     ],
     providers:[
-        AwsEmailService,
         GmailEmailService,
         EmailService
     ],
