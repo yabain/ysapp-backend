@@ -22,12 +22,13 @@ import { APP_GUARD } from "@nestjs/core";
         SecurityModule,
         KeycloakConnectModule.registerAsync({
           imports:[ConfigModule],
-          inject:[ConfigModule],
+          inject:[ConfigService],
           useFactory: async (configService:ConfigService)=>({
               authServerUrl: configService.get("KEYCLOAK_SERVER_URI"), // might be http://localhost:8080/auth for older keycloak versions
               realm: configService.get("KEYCLOAK_SERVER_REALM"),
               clientId: configService.get("KEYCLOAK_SERVER_CLIENT_ID"),
               secret: configService.get("KEYCLOAK_SERVER_SECRET"),   
+              bearerOnly:true
             })
         })
     ],    

@@ -2,37 +2,27 @@ import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
-import { AuthController, UserProfilController } from "./controllers";
+import { UserController, UserProfilController } from "./controllers";
 import { User, UserDocument, UserSchema } from "./models";
-import { AuthService, UsersService } from "./services";
-import { AuthLocalStrategy } from "./strategies";
+import { UsersService } from "./services";
+
 import { PasswordUtil } from "./utils";
 import { JWT_CONSTANT } from "src/shared/config";
-import { AuthJwtStrategy } from "./strategies/auth-jwt.strategy";
+import { SharedModule } from "src/shared/shared.module";
 
 
 @Module({
     imports:[
-        MongooseModule.forFeatureAsync([
-        {
-            name:User.name,
-            useFactory: ()=>{
-                const schema = UserSchema
-                schema.pre("save",function (next){
-                    this.password=PasswordUtil.hash(this.password)
-                    next();
-                })
-                return schema;
-            }
-        }]),
+        MongooseModule.forFeature([{name:User.name,schema:UserSchema}]),
         PassportModule,
         JwtModule.register({
             secret:JWT_CONSTANT.secret,
             signOptions: { expiresIn: JWT_CONSTANT.expiresIn }
-        })
+        }),
+        SharedModule
     ],
-    controllers:[AuthController,UserProfilController],
-    providers:[UsersService,AuthService,AuthLocalStrategy,AuthJwtStrategy],
-    exports:[UsersService,AuthService,AuthJwtStrategy,JwtModule]
+    controllers:[UserProfilController,UserController],
+    providers:[UsersService,],
+    exports:[UsersService,]
 })
 export class UserModule{}

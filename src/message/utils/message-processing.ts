@@ -22,8 +22,8 @@ export class MessageProcessing
     static getVarListWithValues(message:Message,contact:Contact):Record<string,any>
     {
         return {
-            email:message.sender.email,
-            senderName:`${message.sender.firstName} ${message.sender.lastName}`,
+            // email:message.sender.email,
+            // senderName:`${message.sender.firstName} ${message.sender.lastName}`,
             receiverName:`${contact.firstName} ${contact.lastName}`,
             receiverEmail:contact.email
         }
