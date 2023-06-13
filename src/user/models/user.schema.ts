@@ -21,12 +21,11 @@ export type UserDocument = HydratedDocument<User>;
         }
       }
 })
-export class User
+export class User extends Document
 {
-    @Prop({required:true,default:""})
-    kuid:string;
-    
-    
+
+    @Prop({required:true,unique:true})
+    email:string;
 
     @Prop({default:""})
     profilePicture:string;
@@ -40,9 +39,14 @@ export class User
     @Prop({default:""})
     phoneNumber:string;
 
-
     @Prop({type:[{type:mongoose.Schema.Types.ObjectId,ref:Contact.name}]})
     contacts:Contact[];
+
+    @Prop({default:false})
+    hasSyncWhatsApp:boolean;
+
+    @Prop({default:null,type:Object})
+    whatsAppSessionData:Record<string,any>
 
     @Prop({type:[{type:mongoose.Schema.Types.ObjectId,ref:Group.name}]})
     groups:Group[];
@@ -51,7 +55,8 @@ export class User
     isDeleted:boolean;
 
     @Prop({default:Date.now(),required:true})
-    createdAt:Date
+    createdAt:Date;
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

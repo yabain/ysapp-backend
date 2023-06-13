@@ -1,6 +1,5 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { UserController, UserProfilController } from "./controllers";
 import { User, UserDocument, UserSchema } from "./models";
@@ -14,7 +13,6 @@ import { SharedModule } from "src/shared/shared.module";
 @Module({
     imports:[
         MongooseModule.forFeature([{name:User.name,schema:UserSchema}]),
-        PassportModule,
         JwtModule.register({
             secret:JWT_CONSTANT.secret,
             signOptions: { expiresIn: JWT_CONSTANT.expiresIn }

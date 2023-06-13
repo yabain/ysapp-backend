@@ -5,6 +5,7 @@ import configuration from "./config/configuration";
 import { SecurityModule } from "./security/security.module";
 import { AuthGuard, KeycloakConnectModule, ResourceGuard, RoleGuard } from "nest-keycloak-connect";
 import { APP_GUARD } from "@nestjs/core";
+import { UserAuthGuard } from "src/user/guards";
 
 @Module({
     imports:[
@@ -33,18 +34,7 @@ import { APP_GUARD } from "@nestjs/core";
         })
     ],    
     providers: [
-      {
-        provide: APP_GUARD,     
-        useClass: AuthGuard,
-      },
-      {
-        provide: APP_GUARD,
-        useClass: ResourceGuard,
-      },
-      {
-        provide: APP_GUARD,
-        useClass: RoleGuard,
-      },
+      
     ],
     exports:[
       SecurityModule,

@@ -9,9 +9,11 @@ export class PostNewMessageDTO
     @IsEnum(MessageType)
     type:MessageType;
 
+    @IsOptional()
     @IsMongoId({each:true})
     contactsID:ObjectId[];
 
+    @IsOptional()
     @IsMongoId({each:true})
     groupsID:ObjectId[];
 

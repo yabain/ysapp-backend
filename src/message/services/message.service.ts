@@ -25,15 +25,20 @@ export class MessageService extends DataBaseService<MessageDocument>
 
         }
 
-    async postNewMessage(postNewMessage:PostNewMessageDTO,userId:string)
+    async postNewMessage(postNewMessage:PostNewMessageDTO,email:string)
     {
-        let message:Message = new Message()
-        message.sender = await this.userService.findOneByField({"_id":userId});
+        let message:MessageDocument = new this.messageModel();
+        message.sender = await this.userService.findOneByField({"email":email});
         message.type = postNewMessage.type;
         message.isSentToNow = postNewMessage.isSentToNow;
-        message.body = postNewMessage.body;
-        message.contacts = await Promise.all(postNewMessage.contactsID.map((contactId)=> this.contactService.findOneByField({"_id":contactId})));
-        message.groups = await Promise.all(postNewMessage.groupsID.map((groupId)=>this.groupService.findOneByField({"_id":groupId})));
+        if(postNewMessage.body.fileUrl) message.body.fileUrl =postNewMessage.body.fileUrl;
+        if(postNewMessage.body.text) message.body.text =postNewMessage.body.text;
+
+        message.contacts = [];
+        if(postNewMessage.contactsID)message.contacts = await Promise.all(postNewMessage.contactsID.map((contactId)=> this.contactService.findOneByField({"_id":contactId})));
+        
+        message.groups =[]; 
+        if(postNewMessage.groupsID) message.groups = await Promise.all(postNewMessage.groupsID.map((groupId)=>this.groupService.findOneByField({"_id":groupId})));
         message.groups.forEach((group)=>message.contacts=[...message.contacts,...group.contacts])
         if(postNewMessage.dateToSend) message.dateToSend = postNewMessage.dateToSend;
 

@@ -15,7 +15,7 @@ import { GroupService } from "./services/group.service";
         ]),
         UserModule
     ],
-    exports:[],
+    exports:[GroupService],
     providers:[GroupService]
 })
 export class GroupModule{}

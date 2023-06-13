@@ -1,4 +1,4 @@
-import { IsOptional, IsObject, IsString } from "class-validator"
+import { IsOptional, IsObject, IsString, IsUrl } from "class-validator"
 
 export class MessageBodyDTO
 {
@@ -7,6 +7,6 @@ export class MessageBodyDTO
     text:string;
     
     @IsOptional()
-    @IsObject()
-    file:Record<any,any>
+    @IsUrl()
+    fileUrl:string
 }

@@ -17,9 +17,10 @@ export class ContactsService extends DataBaseService<ContactDocument>
         super(contactModel,connection);
     }
 
-    async createNewContact(createContactDTO: CreateContactDTO,userId:string):Promise<ContactDocument>
+    async createNewContact(createContactDTO: CreateContactDTO,email:string):Promise<ContactDocument>
     {
-        let user= await this.usersService.findOneByField({"_id":userId});
+        let user= await this.usersService.findOneByField({email});
+        console.log("user herer",user)
         let contact = new this.contactModel(createContactDTO);
         user.contacts.push(contact);
         await user.save()

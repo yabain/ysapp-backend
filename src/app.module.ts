@@ -6,17 +6,35 @@ import { GroupModule } from './group';
 import configuration from './shared/config/configuration';
 import { SharedModule } from './shared/shared.module';
 import { UserModule } from './user/user.module';
+import { APP_GUARD } from '@nestjs/core';
+import { ResourceGuard, RoleGuard } from 'nest-keycloak-connect';
+import { UserAuthGuard } from './user/guards';
+import { MessageModule } from './message/message.module';
 
 @Module({
   imports: [
     SharedModule,
     UserModule,
     ContactModule,
+    MessageModule,
     GroupModule
   ],
   controllers: [
     AppController
   ],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,     
+      useClass: UserAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ResourceGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
+  ],
 })
 export class AppModule {}

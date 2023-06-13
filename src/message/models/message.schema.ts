@@ -32,7 +32,7 @@ export class Message extends Document
     @Prop({type:{type:mongoose.Schema.Types.ObjectId,ref:User.name}})
     sender:User;
 
-    @Prop({required:true,default:MessageType,type:MessageType})
+    @Prop({required:true,default:MessageType.TEXT,enum:MessageType})
     type:MessageType;
 
 
@@ -51,8 +51,8 @@ export class Message extends Document
     @Prop({default:null,type:Date})
     dateToSend:Date;
 
-    @Prop({default:""})
-    body:{text:string,file:Record<any,any>} ;
+    @Prop({default:{},type:{text:String,fileUrl:String}})
+    body:{text:string,fileUrl:string} ;
 
     @Prop({default:Date.now(),required:true})
     createdAt:Date
