@@ -2,7 +2,7 @@ import { PartialType } from "@nestjs/mapped-types";
 import { CreateContactDTO } from "./create-contact.dto";
 
 /**
- * @apiDefine UpdateUserDTO Mise a jour d'un contact
+ * @apiDefine UpdateContactDTO Mise a jour d'un contact
  * @apiBody {String {4..65}} [firstName] Prenom du contact
  * @apiBody {String {4..65}} [lastName] Nom du contact
  * @apiBody {String} [email] Email du contact
@@ -14,4 +14,4 @@ import { CreateContactDTO } from "./create-contact.dto";
  * @apiBody {String} [location] Zone de localisation du contact
  * @apiBody {String} [phoneNumber] Autre numéro de téléphone du contact
  */
-export class UpdateUserDTO extends PartialType(CreateContactDTO){}
+export class UpdateContactDTO extends PartialType(CreateContactDTO){}

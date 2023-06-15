@@ -4,6 +4,14 @@
   "version": "1.0.0",
   "description": "Nest TypeScript starter repository",
   "license": "MIT",
+  "apidoc": {
+    "name": "Ysapp API Documentation",
+    "version": "1.0.0",
+    "description": "API de l'application Ysapp. Cette documentation contient toutes les endpoints exposé par l'API ainsi que le corps de requete",
+    "title": "Ysapp API Documentation",
+    "url": "https://ysapp-api.yaba-in.com",
+    "sampleUrl": "https://ysapp-api.yaba-in.com"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "env-cmd -f .env.prod nest build",
@@ -15,6 +23,7 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
+    "doc": "apidoc -i src -o docs",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",

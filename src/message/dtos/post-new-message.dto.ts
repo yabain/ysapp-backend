@@ -4,6 +4,19 @@ import { Transform, Type } from "class-transformer";
 import { MessageType } from "../models";
 import { MessageBodyDTO } from "./message-body.dto";
 
+/**
+ * @apiDefine PostNewMessageDTO Post d'un nouveau message
+ * @apiBody {String} type Type de message. les types suivants sont accepté: `text` pour les message textuelle,
+ *   `image` pour les images, `document` pour tout type de document (word, excel, powerpoint...) et `conctact` dans le cas où le message est un partage de contact
+ * @apiBody {Array} [contactsID] Tableau d'identifiant de contacts sur lesquels envoyé les messages. 
+ * @apiBody {Array} [groupsID] Tableau d'identifiant de groupes de contacts sur lesquels envoyé les messages 
+ * @apiBody {String} isSentToNow Est définis sur `true` si le message est instantané et sur `false` si l'envoi est programmé a une date ultérieur
+ * @apiBody {String} [dateToSend] Date d'envoi du message. utilisé si l'envoi du message est programmé à une date ultérieur
+ * @apiBody {String} [country] Pays d'habitation du contact
+ * @apiBody {Object} body contenu du message
+ * @apiBody {String} [body.text] Contenu textuel du message. Est utilisé en tant que description du fichier dans le cas où l'attribut `fileUrl` est définis 
+ * @apiBody {String} [body.fileUrl] Url du fichier multimédia attaché au message 
+ */
 export class PostNewMessageDTO
 {
     @IsEnum(MessageType)

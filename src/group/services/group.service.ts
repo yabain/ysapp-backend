@@ -15,6 +15,7 @@ export class GroupService extends DataBaseService<GroupDocument> {
   ) {
     super(groupModel, connection);
   }
+  
   async createNewGroup(
     createContactDTO: CreateGroupDTO,
     userId: string,

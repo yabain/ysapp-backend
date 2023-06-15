@@ -403,3 +403,5 @@ dist
 !.elasticbeanstalk/*.global.yml
 
 .wwebjs_auth/*
+
+docs/*

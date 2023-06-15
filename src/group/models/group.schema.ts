@@ -24,6 +24,9 @@ export class Group extends Document
     @Prop({required:true,default:""})
     description:string;
 
+    @Prop({default:""})
+    profilePicture:string;
+
     @Prop({type:[{type:mongoose.Schema.Types.ObjectId,ref:'Contact'}]})
     contacts:any[];
 
