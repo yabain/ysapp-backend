@@ -6,15 +6,13 @@ import { CreateContactDTO } from "../dtos";
 import { Contact, ContactDocument } from "../models";
 import { DataBaseService } from "src/shared/services/database";
 import { UsersService } from "src/user/services";
-import { GroupService } from "src/group/services/group.service";
 
 @Injectable()
 export class ContactsService extends DataBaseService<ContactDocument>
 {
     constructor(@InjectModel(Contact.name) private contactModel:Model<ContactDocument>,
         @InjectConnection() connection:mongoose.Connection,
-        private usersService:UsersService,
-        private groupService:GroupService
+        private usersService:UsersService
         ){
         super(contactModel,connection);
     }
