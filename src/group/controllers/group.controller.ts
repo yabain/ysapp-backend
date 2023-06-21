@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseUUIDPipe, Post, Put, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseUUIDPipe, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AddContactToGroupDTO, CreateGroupDTO, UpdateGroupDTO } from "../dtos";
 import { Request } from "express";
 import { GroupService } from "../services/group.service";
@@ -189,13 +189,95 @@ export class GroupController
     @Put(":id")
     async updateGroupById(@Req() request:Request, @Param("id",new ParseUUIDPipe({version:"4"})) id:string,updateGroupDTO:UpdateGroupDTO)
     {
-        let data=await this.groupsService.update({"_id":id},updateGroupDTO);
+        let data=await this.groupsService.findOneByField({"_id":id})
+        if(!data) throw new NotFoundException({
+            statusCode: 404,
+            error:"ContactGroup/NotFound",
+            message:["Contact group not found"]
+        })
+
+        data=await this.groupsService.update({"_id":id},updateGroupDTO);
         return {
             statusCode:HttpStatus.OK,
             message:"Group updated successfully",
             data
         }
     }
+
+    /**
+     * 
+     * @api {delete} /groups/:idGroup/:idGroupToTransfert Suppression de groupe
+     * @apiDescription Suppression d'un groupe a partir de son ID. un autre ID optionnel supplémentaire peut-être envoyé et representant l'ID du groupe ou serons
+     *  transferer les contacts du groupe en cours de suppression
+     * @apiParam {String} idGroup Identifiant du groupe
+     * @apiParam {String} [idGroupToTransfert] Identifiant du groupe vers lequel serons tranferer les contacts de l'ancien groupe
+     * @apiName Suppression de groupe
+     * @apiGroup Gestion de groupe
+     * @apiUse apiSecurity
+     * @apiUse apiDefaultResponse
+     * 
+     * @apiSuccess (200 Ok) {Number} statusCode status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Object} data response data
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiUse apiError
+     * 
+     */
+    @Delete(":idGroup/:idGroupToTransfert")
+    async deleteGroupeById( @Param("idGroup",new ParseUUIDPipe({version:"4"})) idGroup:string,@Param("idGroupToTransfert",new ParseUUIDPipe({version:"4"})) idGroupToTransfert:string)
+    {
+        let group=await this.groupsService.findOneByField({"_id":idGroup})
+        if(!group) throw new NotFoundException({
+            statusCode: 404,
+            error:"ContactGroup/NotFound",
+            message:["Contact group not found"]
+        })
+
+        let groupToTransfert=null;
+        if(idGroupToTransfert)
+        {
+            let groupToTransfert=await this.groupsService.findOneByField({"_id":idGroupToTransfert})
+            if(!groupToTransfert) throw new NotFoundException({
+                statusCode: 404,
+                error:"ContactGroup/NotFound",
+                message:["Contact group to transfert contact not found"]
+            })
+        }
+
+        this.groupsService.executeWithTransaction(async (session)=> { 
+            await  Promise.all(
+                group.contacts.map((contact)=>{
+                    //retrait dans le groupe actuelle
+                    let oldGroupIndex=contact.groups.findIndex((groupSearch)=>groupSearch._id==idGroup);
+                    if(oldGroupIndex>-1) contact.groups.splice(oldGroupIndex,1);
+
+                    //ajout dans le nouveau groupe
+                    if(groupToTransfert) 
+                    {
+                        let newGroup = contact.groups.find((groupSearch)=>groupSearch._id==idGroupToTransfert);
+                        if(!newGroup) 
+                        {
+                            contact.groups.push(groupToTransfert);
+                            groupToTransfert.push(contact)
+                            groupToTransfert.save({session})
+                        }                                                
+                    }                    
+                    return contact.save({session})
+                })
+            )   
+            
+            //suppression du groupe
+            group.delete({session});
+            return {
+                statusCode:HttpStatus.OK,
+                message:"Group deleted successfully",
+            }
+        })
+
+
+    }
+
 
     
 }
