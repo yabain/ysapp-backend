@@ -6,6 +6,7 @@ import { CreateContactDTO } from "../dtos";
 import { Contact, ContactDocument } from "../models";
 import { DataBaseService } from "src/shared/services/database";
 import { UsersService } from "src/user/services";
+import { GroupService } from "src/group/services/group.service";
 
 @Injectable()
 export class ContactsService extends DataBaseService<ContactDocument>
@@ -13,6 +14,7 @@ export class ContactsService extends DataBaseService<ContactDocument>
     constructor(@InjectModel(Contact.name) private contactModel:Model<ContactDocument>,
         @InjectConnection() connection:mongoose.Connection,
         private usersService:UsersService,
+        private groupService:GroupService
         ){
         super(contactModel,connection);
     }
@@ -20,7 +22,6 @@ export class ContactsService extends DataBaseService<ContactDocument>
     async createNewContact(createContactDTO: CreateContactDTO,email:string):Promise<ContactDocument>
     {
         let user= await this.usersService.findOneByField({email});
-        console.log("user herer",user)
         let contact = new this.contactModel(createContactDTO);
         user.contacts.push(contact);
         await user.save()

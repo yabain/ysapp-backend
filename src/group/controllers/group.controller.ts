@@ -39,7 +39,7 @@ export class GroupController
     @Post()    
     async addGroup(@Req() request:Request, @Body() createGroupDTO:CreateGroupDTO)
     {
-        let data=await this.groupsService.createNewGroup(createGroupDTO,request["user"]["userId"])
+        let data=await this.groupsService.createNewGroup(createGroupDTO,request["user"]["email"])
         return {
             statusCode:HttpStatus.CREATED,
             message:"Group add successfully",
@@ -67,7 +67,7 @@ export class GroupController
     @Post("contact")
     async addContactToGroup(@Req() request:Request, @Body() addContactToGroupDTO:AddContactToGroupDTO)
     {
-        await this.groupsService.addContactToGroup(request["user"]["userId"],addContactToGroupDTO.contactId,addContactToGroupDTO.groupId)
+        await this.groupsService.addContactToGroup(request["user"]["email"],addContactToGroupDTO.contactId,addContactToGroupDTO.groupId)
         return {
             statusCode:HttpStatus.OK,
             message:"Contact add to group successfully"

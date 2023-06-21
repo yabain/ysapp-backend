@@ -18,17 +18,17 @@ export class GroupService extends DataBaseService<GroupDocument> {
   
   async createNewGroup(
     createContactDTO: CreateGroupDTO,
-    userId: string,
+    userEmail: string,
   ): Promise<GroupDocument> {
-    const user = await this.usersService.findOneByField({ _id: userId });
+    const user = await this.usersService.findOneByField({ email: userEmail });
     const group = new this.groupModel(createContactDTO);
     user.groups.push(group);
     await user.save();
     return group.save();
   }
 
-  async addContactToGroup(userId: string, contactId: string, groupId: string) {
-    let user = await this.usersService.findOneByField({ _id: userId });
+  async addContactToGroup(userEmail: string, contactId: string, groupId: string) {
+    let user = await this.usersService.findOneByField({ email: userEmail });
     let contact = user.contacts.find((c) => c.id == contactId);
     let group = user.groups.find((g) => g.id == groupId);
     contact.groups.push(group);
