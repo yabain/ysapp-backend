@@ -1,4 +1,6 @@
-import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, Matches, IsPhoneNumber, IsMobilePhone, IsFQDN } from "class-validator";
+import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, Matches, IsPhoneNumber, IsMobilePhone, IsFQDN, IsDate, Max } from "class-validator";
+import { Transform, Type } from "class-transformer";
+
 
 /**
  * @apiDefine CreateContactDTO Creation d'un nouveau contact
@@ -9,9 +11,14 @@ import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, Matches, IsPh
  * @apiBody {String} [country] Pays d'habitation du contact
  * @apiBody {String} [whatsappContact] Numero whatsapp du contact
  * @apiBody {String} [skype] Contact skype 
- * @apiBody {String} websiteLink Lien du site web du contact 
- * @apiBody {String} location Zone de localisation du contact
- * @apiBody {String} phoneNumber Autre numéro de téléphone du contact
+ * @apiBody {String} [websiteLink] Lien du site web du contact 
+ * @apiBody {String} [address] Addresse de localisation du contact
+ * @apiBody {String} [phoneNumber] Autre numéro de téléphone du contact
+ * @apiBody {String} [gender] Sexe du contact
+ * @apiBody {String} [about] Biographie du contact
+ * @apiBody {String} [organization] Organisation du contact
+ * @apiBody {String} [city] Ville de résidence du contact
+ * @apiBody {Date} [birthday] Date d'anniversaire du contact
  */
 export class CreateContactDTO
 {
@@ -32,7 +39,6 @@ export class CreateContactDTO
     @Matches("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])")
     email:string;
 
-    
     @IsOptional()
     @IsString()
     @IsUrl()
@@ -60,10 +66,37 @@ export class CreateContactDTO
     @IsOptional()
     @MinLength(4)
     @IsString()
-    location:string;
+    address:string;
 
     @IsOptional()
     @IsMobilePhone()
     phoneNumber:string
 
+    @IsOptional()
+    @MinLength(4)
+    @MaxLength(8)
+    gender:string;
+
+    @IsOptional()
+    @Transform(({value})=> value && new Date(value))
+    @IsDate()
+    birthday:Date;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(4)
+    @MaxLength(65)
+    about:string;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(2)
+    @MaxLength(64)
+    organization:string;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(2)
+    @MaxLength(65)
+    city:string
 }

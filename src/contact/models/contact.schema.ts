@@ -39,13 +39,29 @@ export class Contact extends Document
     country:string;
 
     @Prop({default:""})
-    location:string;
+    address:string;
+
+    @Prop({default:""})
+    gender:string;
+
+    @Prop({default:""})
+    about:string;
+
+    @Prop({default:""})
+    organization:string;
+
+    @Prop({default:""})
+    city:string;
+
+    @Prop({default:Date.now()})
+    birthday:Date;
 
     @Prop({type:[{type:mongoose.Schema.Types.ObjectId,ref:'Group'}]})
     groups:any[]
 
     @Prop({default:Date.now(),required:true})
-    createdAt:Date
+    createdAt:Date;
+
 }
 
 export const ContactSchema = SchemaFactory.createForClass(Contact)
