@@ -63,6 +63,54 @@ export class ContactController
 
     /**
      * 
+     * @api {get} /contacts/ Obtention des contacts de l'utilisateur connecté
+     * @apiDescription Obtention des contacts de l'utilisateur connecté
+     * @apiName Obtention des contacts de l'utilisateur connecté
+     * @apiGroup Gestion de contact
+     * @apiUse apiSecurity
+     * @apiUse apiDefaultResponse
+     * 
+     * @apiSuccess (200 Ok) {Number} statusCode status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Array} data response data
+     * @apiSuccess (200 Ok)  {String {4..65}} data.firstName Prenom du contact
+     * @apiSuccess (200 Ok)  {String {4..65}} data.lastName Nom du contact
+     * @apiSuccess (200 Ok)  {String} data.email Email du contact
+     * @apiSuccess (200 Ok)  {String} data.profilePicture Lien de la photo de profil du contact
+     * @apiSuccess (200 Ok)  {String} data.country Pays d'habitation du contact
+     * @apiSuccess (200 Ok)  {String} data.whatsappContact Numero whatsapp du contact
+     * @apiSuccess (200 Ok)  {String} data.skype Contact skype 
+     * @apiSuccess (200 Ok)  {String} data.websiteLink Lien du site web du contact 
+     * @apiSuccess (200 Ok)  {String} data.address addresse de localisation du contact
+     * @apiSuccess (200 Ok)  {String} data.phoneNumber Autre numéro de téléphone du contact
+     * @apiSuccess (200 Ok)  {String} data.gender Sexe du contact
+     * @apiSuccess (200 Ok)  {String} data.about Biographie du contact
+     * @apiSuccess (200 Ok)  {String} data.organization Organisation du contact
+     * @apiSuccess (200 Ok)  {String} data.city Ville de résidence du contact
+     * @apiSuccess (200 Ok)  {String} data.birthday Date d'anniversaire du contact
+     * @apiSuccess (200 Ok)  {Array} data.groups Group de contact
+     * @apiSuccess (200 Ok)  {String {4..65}} data.groups.name Nom du group de contact
+     * @apiSuccess (200 Ok)  {String {4..65}} data.groups.description Description du groupe de contact
+     * @apiSuccess (200 Ok)  {String} data.groups.profilePicture Lien de la photo de groupe
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiUse apiError
+     * 
+     */
+    @Get()
+    async getAllUserContact(@Req() request:Request)
+    {
+        let user = await this.usersService.findOneByField({email:request["user"]["email"]});
+        return {
+            statusCode:HttpStatus.OK,
+            message:"List des contacts de l'utilisateur courant",
+            data:user.contacts
+        }
+        
+    }
+
+    /**
+     * 
      * @api {get} /contacts/:id Obtention d'un contact
      * @apiDescription Obtention d'un contact a partir de son ID 
      * @apiParam {String} id Identifiant du contact
@@ -101,7 +149,7 @@ export class ContactController
     @Get(":id")    
     async getContactById(@Req() request:Request, @Param("id",new ParseUUIDPipe({version:"4"})) id:string)
     {
-        let data=await this.contactsService.findOneByField({"contacts.id":id})
+        let data=await this.contactsService.findOneByField({"_id":id})
         return {
             statusCode:HttpStatus.OK,
             message:"Contact details",
@@ -158,53 +206,7 @@ export class ContactController
         }
     }
 
-    /**
-     * 
-     * @api {get} /contacts/ Obtention des contacts de l'utilisateur connecté
-     * @apiDescription Obtention des contacts de l'utilisateur connecté
-     * @apiName Obtention des contacts de l'utilisateur connecté
-     * @apiGroup Gestion de contact
-     * @apiUse apiSecurity
-     * @apiUse apiDefaultResponse
-     * 
-     * @apiSuccess (200 Ok) {Number} statusCode status code
-     * @apiSuccess (200 Ok) {String} Response Description
-     * @apiSuccess (200 Ok) {Array} data response data
-     * @apiSuccess (200 Ok)  {String {4..65}} data.firstName Prenom du contact
-     * @apiSuccess (200 Ok)  {String {4..65}} data.lastName Nom du contact
-     * @apiSuccess (200 Ok)  {String} data.email Email du contact
-     * @apiSuccess (200 Ok)  {String} data.profilePicture Lien de la photo de profil du contact
-     * @apiSuccess (200 Ok)  {String} data.country Pays d'habitation du contact
-     * @apiSuccess (200 Ok)  {String} data.whatsappContact Numero whatsapp du contact
-     * @apiSuccess (200 Ok)  {String} data.skype Contact skype 
-     * @apiSuccess (200 Ok)  {String} data.websiteLink Lien du site web du contact 
-     * @apiSuccess (200 Ok)  {String} data.address addresse de localisation du contact
-     * @apiSuccess (200 Ok)  {String} data.phoneNumber Autre numéro de téléphone du contact
-     * @apiSuccess (200 Ok)  {String} data.gender Sexe du contact
-     * @apiSuccess (200 Ok)  {String} data.about Biographie du contact
-     * @apiSuccess (200 Ok)  {String} data.organization Organisation du contact
-     * @apiSuccess (200 Ok)  {String} data.city Ville de résidence du contact
-     * @apiSuccess (200 Ok)  {String} data.birthday Date d'anniversaire du contact
-     * @apiSuccess (200 Ok)  {Array} data.groups Group de contact
-     * @apiSuccess (200 Ok)  {String {4..65}} data.groups.name Nom du group de contact
-     * @apiSuccess (200 Ok)  {String {4..65}} data.groups.description Description du groupe de contact
-     * @apiSuccess (200 Ok)  {String} data.groups.profilePicture Lien de la photo de groupe
-     * 
-     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
-     * @apiUse apiError
-     * 
-     */
-    @Get()
-    async getAllUserContact(@Req() request:Request)
-    {
-        let user = await this.usersService.findOneByField({email:request["user"]["email"]});
-        return {
-            statusCode:HttpStatus.OK,
-            message:"List des contacts de l'utilisateur courant",
-            data:user.contacts
-        }
-        
-    }
+    
 
 
 
