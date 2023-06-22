@@ -77,7 +77,7 @@ export class WhatsappAnnouncementService {
       if(message.body.fileUrl) body.file = await MessageMedia.fromUrl(message.body.fileUrl);
       
       let state=await newWhatsappClient.getState()
-      console.log(contact.phoneNumber,body.text,body.file,state)
+      // console.log(contact.phoneNumber,body.text,body.file,state)
       if(!body.file) return newWhatsappClient.sendMessage(`${contact.phoneNumber}@c.us`,body.text);
       return newWhatsappClient.sendMessage(`${contact.phoneNumber}@c.us`,body.file,{
         caption:body.text

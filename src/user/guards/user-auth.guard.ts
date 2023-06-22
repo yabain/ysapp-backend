@@ -27,7 +27,7 @@ export class UserAuthGuard extends AuthGuard
         if(result && request.user)
         {
             let user = await this.userService.findOneByField({email:request.user.email});
-            console.log("user",user)
+            // console.log("user",user)
             if(!user) await this.userService.create({email:request.user.email})
         }
         return result;

@@ -10,7 +10,7 @@ export class UsersService extends DataBaseService<UserDocument>
     constructor(@InjectModel(User.name) private userModel:Model<UserDocument>,
     @InjectConnection() connection:mongoose.Connection,){
         super(userModel,connection);
-        console.log("User ",User.name)
+        // console.log("User ",User.name)
     }
 
     async findAll(): Promise<UserDocument[]>

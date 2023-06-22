@@ -8,7 +8,7 @@ export class UserController
     @Get()
     getUsersList(@Req() request:Request)
     {
-        console.log(request["user"])
+        // console.log(request["user"])
         return {
             mgg:"Voici la liste"
         }

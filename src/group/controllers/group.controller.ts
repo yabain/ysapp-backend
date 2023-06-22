@@ -51,6 +51,7 @@ export class GroupController
      * 
      * @api {get} /groups/:idGroup/contacts Obtention des contacts d'un groupe
      * @apiDescription Obtention des contacts d'un groupe
+     * @apiParam {String} idGroup Identifiant du groupe
      * @apiName Obtention des contacts d'un groupe
      * @apiGroup Gestion de groupe
      * @apiUse apiSecurity
