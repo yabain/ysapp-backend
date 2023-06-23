@@ -32,7 +32,7 @@ export class MessageController
     {
         return {
             statusCode:HttpStatus.OK,
-            message:"Messsage send successfully",
+            message:"Qr-Code generated successfully",
             data:await this.whatsAppAnnouncementService.initWhatsAppSession(request["user"]["email"])
         }
     }
