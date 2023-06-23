@@ -25,6 +25,9 @@ export class WhatsappAnnouncementService {
     console.log(this.clientsWhatsApp)
     if(this.clientsWhatsApp.has(userFound.id)) return this.clientsWhatsApp.get(userFound.id);
     let newWhatsappClient = new Client({
+      puppeteer: {
+        args: ['--no-sandbox','--disable-setuid-sandbox'],
+      },
       // authStrategy: new LegacySessionAuth()
       authStrategy:new LocalAuth({
         // store:new MongoStore({mongoose:{
