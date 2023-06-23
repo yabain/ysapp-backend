@@ -4,6 +4,7 @@ import { CreateContactDTO, UpdateContactDTO } from "../dtos";
 import { ContactsService } from "../services";
 import { UsersService } from "src/user/services";
 import { GroupService } from "src/group/services/group.service";
+import { ObjectIDValidationPipe } from "src/shared/pipes";
 
 
 
@@ -148,7 +149,7 @@ export class ContactController
      * 
      */
     @Get(":id")    
-    async getContactById(@Req() request:Request, @Param("id",new ParseUUIDPipe({version:"4"})) id:string)
+    async getContactById(@Req() request:Request, @Param("id",ObjectIDValidationPipe) id:string)
     {
         let data=await this.contactsService.findOneByField({"_id":id})
         return {
@@ -197,7 +198,7 @@ export class ContactController
      * 
      */
     @Put(":id")
-    async updateContactById(@Req() request:Request, @Param("id",new ParseUUIDPipe({version:"4"})) id:string,@Body() updateContactDTO:UpdateContactDTO)
+    async updateContactById(@Req() request:Request, @Param("id",ObjectIDValidationPipe) id:string,@Body() updateContactDTO:UpdateContactDTO)
     {
         let data=await this.contactsService.update({"_id":id},updateContactDTO)
         return {
@@ -226,7 +227,7 @@ export class ContactController
      * 
      */
     @Delete(":id")
-    async deleteContactById(@Req() request:Request,@Param("id",new ParseUUIDPipe({version:"4"})) id:string)
+    async deleteContactById(@Req() request:Request,@Param("id",ObjectIDValidationPipe) id:string)
     {
         let contact=await this.contactsService.findOneByField({"_id":id})
         if(!contact) throw new NotFoundException({

@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException,
 import { AddContactToGroupDTO, CreateGroupDTO, UpdateGroupDTO } from "../dtos";
 import { Request } from "express";
 import { GroupService } from "../services/group.service";
+import { ObjectIDValidationPipe } from "src/shared/pipes";
 
 @Controller("groups")
 export class GroupController
@@ -85,7 +86,7 @@ export class GroupController
      * 
      */
     @Get(":idGroup/contacts")
-    async getAllllGroupContact(@Param("idGroup",new ParseUUIDPipe({version:"4"})) idGroup:string)
+    async getAllllGroupContact(@Param("idGroup",ObjectIDValidationPipe) idGroup:string)
     {
         let data=await this.groupsService.findOneByField({"_id":idGroup})
         if(!data) throw new NotFoundException({
@@ -150,7 +151,7 @@ export class GroupController
      * 
      */
     @Get(":id")    
-    async getGroupById(@Req() request:Request, @Param("id",new ParseUUIDPipe({version:"4"})) id:string)
+    async getGroupById(@Req() request:Request, @Param("id",ObjectIDValidationPipe) id:string)
     {
         let data=await this.groupsService.findOneByField({"_id":id})
         if(!data) throw new NotFoundException({
@@ -188,7 +189,7 @@ export class GroupController
      * 
      */
     @Put(":id")
-    async updateGroupById(@Req() request:Request, @Param("id",new ParseUUIDPipe({version:"4"})) id:string,updateGroupDTO:UpdateGroupDTO)
+    async updateGroupById(@Req() request:Request, @Param("id",ObjectIDValidationPipe) id:string,updateGroupDTO:UpdateGroupDTO)
     {
         let data=await this.groupsService.findOneByField({"_id":id})
         if(!data) throw new NotFoundException({
@@ -226,7 +227,7 @@ export class GroupController
      * 
      */
     @Delete(":idGroup/:idGroupToTransfert")
-    async deleteGroupeById( @Param("idGroup",new ParseUUIDPipe({version:"4"})) idGroup:string,@Param("idGroupToTransfert",new ParseUUIDPipe({version:"4"})) idGroupToTransfert:string)
+    async deleteGroupeById( @Param("idGroup",ObjectIDValidationPipe) idGroup:string,@Param("idGroupToTransfert",ObjectIDValidationPipe) idGroupToTransfert:string)
     {
         let group=await this.groupsService.findOneByField({"_id":idGroup})
         if(!group) throw new NotFoundException({
