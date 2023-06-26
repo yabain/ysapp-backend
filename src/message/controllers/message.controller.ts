@@ -2,13 +2,15 @@ import { Controller, Post, UseGuards, Body, HttpStatus, Req,Get } from "@nestjs/
 import { Request } from "express";
 import { PostNewMessageDTO } from "../dtos";
 import { MessageService, WhatsappAnnouncementService } from "../services";
+import { UsersService } from "src/user/services";
 
 @Controller("message")
 export class MessageController
 {
     constructor(
         private messageService:MessageService,
-        private whatsAppAnnouncementService:WhatsappAnnouncementService
+        private whatsAppAnnouncementService:WhatsappAnnouncementService,
+        private usersService:UsersService
         ){}
 
 
@@ -34,6 +36,31 @@ export class MessageController
             statusCode:HttpStatus.OK,
             message:"Qr-Code generated successfully",
             data:await this.whatsAppAnnouncementService.initWhatsAppSession(request["user"]["email"])
+        }
+    }
+
+     /**
+     * 
+     * @api {get} /message/qr-code/state Etat de synchronization du Qr-Code avec WhatsApp
+     * @apiDescription Etat de synchronization du Qr-Code avec l'application WhatsApp
+     * @apiName Etat de synchronization du Qr-Code
+     * @apiGroup Gestion de message
+     * @apiUse apiSecurity
+     * @apiUse apiDefaultResponse
+     * 
+     * @apiSuccess (200 Ok) {Number} statusCode status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {String} data est définis sur `true` si la synchronization est bien etabli et `false` dans le cas contraire
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiUse apiError
+     */
+    @Get("qr-code/state")
+    async getQrCodeState(request:Request)
+    {
+        return {
+            statusCode:HttpStatus.OK,
+            message:"Etat de synchronnization du qr-code avec WhatsApp",
+            data: (await this.usersService.findOneByField({"email":request["user"]["email"]})).hasSyncWhatsApp
         }
     }
 

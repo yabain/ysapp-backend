@@ -2,12 +2,57 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException,
 import { AddContactToGroupDTO, CreateGroupDTO, UpdateGroupDTO } from "../dtos";
 import { Request } from "express";
 import { GroupService } from "../services/group.service";
+import { UsersService } from "src/user/services/users.service"
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 
 @Controller("groups")
 export class GroupController
 {
-    constructor(private groupsService:GroupService){}
+    constructor(private groupsService:GroupService, private usersService:UsersService){}
+
+    /**
+     * 
+     * @api {get} /groups/ Obtention des groups de contacts
+     * @apiDescription Obtention des groupes de contacts
+     * @apiName Obtention des groupes de contacts
+     * @apiGroup Gestion de groupe
+     * @apiUse apiSecurity
+     * @apiUse apiDefaultResponse
+     * 
+     * @apiSuccess (200 Ok) {Number} statusCode status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Object} data response data
+     * @apiSuccess (200 Ok) {String {4..65}} data.name Nom du group de contact
+     * @apiSuccess (200 Ok) {String {4..65}} data.description Description du groupe de contact
+     * @apiSuccess (200 Ok) {String} data.profilePicture Lien de la photo de groupe
+     * @apiSuccess (200 Ok) {Array} data.contacts Liste des contacts du group
+     * @apiSuccess (200 Ok) {String {4..65}} data.contacts.firstName Prenom du contact
+     * @apiSuccess (200 Ok) {String {4..65}} data.contacts.lastName Nom du contact
+     * @apiSuccess (200 Ok) {String} data.contacts.email Email du contact
+     * @apiSuccess (200 Ok) {String} data.contacts.profilePicture Lien de la photo de profil du contact
+     * @apiSuccess (200 Ok) {String} data.contacts.country Pays d'habitation du contact
+     * @apiSuccess (200 Ok) {String} data.contacts.whatsappContact Numero whatsapp du contact
+     * @apiSuccess (200 Ok) {String} data.contacts.skype Contact skype 
+     * @apiSuccess (200 Ok) {String} data.contacts.websiteLink Lien du site web du contact 
+     * @apiSuccess (200 Ok) {String} data.contacts.location Zone de localisation du contact
+     * @apiSuccess (200 Ok) {String} data.contacts.phoneNumber Autre numéro de téléphone du contact
+     * 
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiUse apiError
+     * 
+     */
+    @Get()    
+    async getGroups(@Req() request:Request)
+    {
+        const user = await this.usersService.findOneByField({ email: request["user"]["email"] });
+        // console.log("User ",user)
+        return {
+            statusCode:HttpStatus.CREATED,
+            message:"Liste des groups de contacts",
+            data: user.groups
+        }        
+    }
 
     /**
      * 
@@ -22,16 +67,20 @@ export class GroupController
      * @apiSuccess (201 Created) {Number} statusCode status code
      * @apiSuccess (201 Created) {String} Response Description
      * @apiSuccess (201 Created) {Object} data response data
-     * @apiSuccess (201 Created)  {String {4..65}} data.firstName Prenom du contact
-     * @apiSuccess (201 Created)  {String {4..65}} data.lastName Nom du contact
-     * @apiSuccess (201 Created)  {String} emaildata. Email du contact
-     * @apiSuccess (201 Created)  {String} data.profilePicture Lien de la photo de profil du contact
-     * @apiSuccess (201 Created)  {String} data.country Pays d'habitation du contact
-     * @apiSuccess (201 Created)  {String} data.whatsappContact Numero whatsapp du contact
-     * @apiSuccess (201 Created)  {String} data.skype Contact skype 
-     * @apiSuccess (201 Created)  {String} data.websiteLink Lien du site web du contact 
-     * @apiSuccess (201 Created)  {String} data.location Zone de localisation du contact
-     * @apiSuccess (201 Created)  {String} data.phoneNumber Autre numéro de téléphone du contact
+     * @apiSuccess (201 Created)  {String {4..65}} data.name Nom du group de contact
+     * @apiSuccess (201 Created)  {String {4..65}} data.description Description du groupe de contact
+     * @apiSuccess (201 Created)  {String} data.profilePicture Lien de la photo de groupe
+     * @apiSuccess (201 Created)  {Array} data.contacts Liste des contacts du group
+     * @apiSuccess (201 Created)  {String {4..65}} data.contacts.firstName Prenom du contact
+     * @apiSuccess (201 Created)  {String {4..65}} data.contacts.lastName Nom du contact
+     * @apiSuccess (201 Created)  {String} data.contacts.email Email du contact
+     * @apiSuccess (201 Created)  {String} data.contacts.profilePicture Lien de la photo de profil du contact
+     * @apiSuccess (201 Created)  {String} data.contacts.country Pays d'habitation du contact
+     * @apiSuccess (201 Created)  {String} data.contacts.whatsappContact Numero whatsapp du contact
+     * @apiSuccess (201 Created)  {String} data.contacts.skype Contact skype 
+     * @apiSuccess (201 Created)  {String} data.contacts.websiteLink Lien du site web du contact 
+     * @apiSuccess (201 Created)  {String} data.contacts.location Zone de localisation du contact
+     * @apiSuccess (201 Created)  {String} data.contacts.phoneNumber Autre numéro de téléphone du contact
      * 
      * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
      * @apiUse apiError

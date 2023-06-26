@@ -1,16 +1,18 @@
 import { Controller, Get, Req } from "@nestjs/common";
 import { Request } from "express";
+import { UsersService } from "../services";
 
 @Controller("/user")
 export class UserController
 {
-    constructor(){}
+    constructor(private userService:UsersService){}
     @Get()
-    getUsersList(@Req() request:Request)
+    async getUsersList(@Req() request:Request)
     {
         // console.log(request["user"])
         return {
-            mgg:"Voici la liste"
+            mgs:"Voici la liste",
+            data:await this.userService.findAll()
         }
     }    
 }

@@ -16,7 +16,8 @@ export class Contact extends Document
     // ,
     @Prop({
         match:/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-        unique:true
+        // unique:true
+        default:""
     })
     email:string;
 

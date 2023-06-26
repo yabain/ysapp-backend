@@ -22,23 +22,19 @@ export class WhatsappAnnouncementService {
 
   getWhatsAppSession(userFound)
   {
-    console.log(this.clientsWhatsApp)
-    if(this.clientsWhatsApp.has(userFound.id)) return this.clientsWhatsApp.get(userFound.id);
+    // if(this.clientsWhatsApp.has(userFound._id)) return this.clientsWhatsApp.get(userFound._id);
     let newWhatsappClient = new Client({
       puppeteer: {
         args: ['--no-sandbox','--disable-setuid-sandbox'],
+        headless: true
       },
-      // authStrategy: new LegacySessionAuth()
       authStrategy:new LocalAuth({
-        // store:new MongoStore({mongoose:{
-        //   connection:this.connection,
-        //   mongo:mongoose.mongo
-        // }}),
-        clientId:userFound.id,
-        // backupSyncIntervalMs: 300000
+        clientId:userFound._id.toString()
       })
     });
-    this.clientsWhatsApp.set(userFound.id,newWhatsappClient);
+    newWhatsappClient.initialize();
+
+    // this.clientsWhatsApp.set(userFound._id.toString(),newWhatsappClient);
     return newWhatsappClient;
   }
 
@@ -63,10 +59,8 @@ export class WhatsappAnnouncementService {
               console.log("Disconeect")
               userFound.hasSyncWhatsApp=false;
               await userFound.save()
-              this.clientsWhatsApp.delete(userFound.id)
+              // this.clientsWhatsApp.delete(userFound._id)
             })
-
-            newWhatsappClient.initialize();
         })
     }
 
@@ -74,28 +68,27 @@ export class WhatsappAnnouncementService {
   {
     return new Promise<boolean>((resolve,reject)=>{
       let newWhatsappClient = this.getWhatsAppSession(message.sender);
-    let body={file:null,text:""}, params = null;
-    Promise.all(message.contacts.map(async (contact)=> {
-      body.text=  MessageProcessing.getPersonalizedMessage(message,contact);
-      if(message.body.fileUrl) body.file = await MessageMedia.fromUrl(message.body.fileUrl);
-      
-      let state=await newWhatsappClient.getState()
-      // console.log(contact.phoneNumber,body.text,body.file,state)
-      if(!body.file) return newWhatsappClient.sendMessage(`${contact.phoneNumber}@c.us`,body.text);
-      return newWhatsappClient.sendMessage(`${contact.phoneNumber}@c.us`,body.file,{
-        caption:body.text
-      });
-    }))
-    .then((result)=>{
-    console.log("Voila ca ",result)
-    resolve(true)
-    })
-    .catch((error)=>{
-    console.log("Error ",error);
-    reject(false)
-    })
-
-
+      let body={file:null,text:""}, params = null;
+      newWhatsappClient.on('ready',()=>{
+        Promise.all(message.contacts.map(async (contact)=> {
+          body.text=  MessageProcessing.getPersonalizedMessage(message,contact);
+          if(message.body.fileUrl) body.file = await MessageMedia.fromUrl(message.body.fileUrl);
+        
+          // console.log("body ",body);
+          if(!body.file) return newWhatsappClient.sendMessage(MessageProcessing.extractPhoneID(`${contact.phoneNumber}@c.us`),body.text);
+          return newWhatsappClient.sendMessage(MessageProcessing.extractPhoneID(`${contact.phoneNumber}@c.us`),body.file,{
+            caption:body.text
+          });
+        }))
+        .then((result)=>{
+          // console.log("Voila ca ",result)
+          resolve(true)
+        })
+        .catch((error)=>{
+          console.log("Error ",error);
+          reject(false)
+        })
+      })
     })  
   }
 

@@ -16,7 +16,7 @@ export class MessageProcessing
   
     static extractPhoneID(phoneNumber:string)
     {
-      return phoneNumber.replace("+","").replace(" ","")
+      return phoneNumber.replace("+","").replace(" ","").replace("-","")
     }
 
     static getVarListWithValues(message:Message,contact:Contact):Record<string,any>

@@ -29,12 +29,11 @@ export enum MessageType {
 })
 export class Message extends Document
 {
-    @Prop({type:{type:mongoose.Schema.Types.ObjectId,ref:User.name}})
+    @Prop({type:mongoose.Schema.Types.ObjectId,ref:User.name,default:null})
     sender:User;
 
     @Prop({required:true,default:MessageType.TEXT,enum:MessageType})
     type:MessageType;
-
 
     @Prop({type:[{type:mongoose.Schema.Types.ObjectId,ref:Contact.name}]})
     contacts:Contact[];

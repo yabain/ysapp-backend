@@ -1,6 +1,6 @@
 import { Body, Controller, Post, UseGuards,Req, HttpStatus, Get, Param, ParseUUIDPipe, Put, Delete, NotFoundException } from "@nestjs/common";
 import { Request } from "express";
-import { CreateContactDTO, UpdateContactDTO } from "../dtos";
+import { CreateContactDTO, DeleteContactsDTO, UpdateContactDTO } from "../dtos";
 import { ContactsService } from "../services";
 import { UsersService } from "src/user/services";
 import { GroupService } from "src/group/services/group.service";
@@ -210,6 +210,53 @@ export class ContactController
 
     /**
      * 
+     * @api {delete} /contacts/ Suppression d'une liste de contacts
+     * @apiDescription Suppression d'une liste de contacts
+     * @apiUse DeleteContactDTO
+     * @apiName Suppression de contact
+     * @apiGroup Gestion de contact
+     * @apiUse apiSecurity
+     * @apiUse apiDefaultResponse
+     * 
+     * @apiSuccess (200 Ok) {Number} statusCode status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Object} data response data
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiUse apiError
+     * 
+     */
+    @Delete()
+    async deleteContacts(@Req() request:Request,@Body() deleteContactDTO:DeleteContactsDTO)
+    {
+
+        await this.contactsService.executeWithTransaction(async (session)=> {
+
+            deleteContactDTO.contactsID.forEach(async (contactID)=>{
+                const contact=await this.contactsService.findOneByField({"_id":contactID})
+                if(!contact) return;
+                await Promise.all(contact.groups.map(async (group)=>{
+                    let fGroup=await this.groupService.findOneByField({_id:group._id})
+                    if(fGroup) {
+                        let indexContact = fGroup.contacts.findIndex((fc)=>fc._id==contact._id);
+                        if(indexContact>-1) {
+                            fGroup.contacts.splice(indexContact,1);
+                            fGroup.save({session})
+                        }
+                    }
+                }))   
+                contact.delete({session});  
+            })
+                      
+        })
+        return {
+            statusCode:HttpStatus.OK,
+            message:"Contacts supprimés avec success"
+        }
+    }
+
+    /**
+     * 
      * @api {delete} /contacts/:idContact Suppression de contact
      * @apiDescription Suppression d'un contact a parti de son id
      * @apiParam {String} idContact Identifiant du contact
@@ -250,6 +297,11 @@ export class ContactController
 
             contact.delete({session});
         })
+
+        return {
+            statusCode:HttpStatus.OK,
+            message:"Contact supprimé avec success"
+        }
 
 
     }

@@ -9,6 +9,11 @@ export abstract class DataBaseService<T extends Document>
         public connection:mongoose.Connection
         ){}
 
+    createInstance(createEntityDTO)
+    {
+        return new this.entityModel(createEntityDTO);
+    }
+    
     async create(createEntityDTO,session=null):Promise<T>
     {
         return new this.entityModel(createEntityDTO).save({session});
