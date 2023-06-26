@@ -231,21 +231,24 @@ export class ContactController
     {
 
         await this.contactsService.executeWithTransaction(async (session)=> {
-
             deleteContactDTO.contactsID.forEach(async (contactID)=>{
                 const contact=await this.contactsService.findOneByField({"_id":contactID})
-                if(!contact) return;
+            console.log("Contact",contact)
+
+                if(!contact) return Promise.resolve();
                 await Promise.all(contact.groups.map(async (group)=>{
                     let fGroup=await this.groupService.findOneByField({_id:group._id})
+                    console.log("Group ",fGroup)
                     if(fGroup) {
                         let indexContact = fGroup.contacts.findIndex((fc)=>fc._id==contact._id);
                         if(indexContact>-1) {
                             fGroup.contacts.splice(indexContact,1);
-                            fGroup.save({session})
+                            await fGroup.save({session})
                         }
                     }
+                    return Promise.resolve();
                 }))   
-                contact.delete({session});  
+                return await  contact.delete({session});  
             })
                       
         })
@@ -290,12 +293,13 @@ export class ContactController
                     let indexContact = fGroup.contacts.findIndex((fc)=>fc._id==contact._id);
                     if(indexContact>-1) {
                         fGroup.contacts.splice(indexContact,1);
-                        fGroup.save({session})
+                       return fGroup.save({session})
                     }
                 }
+                return Promise.resolve();
             }))
 
-            contact.delete({session});
+            return await contact.delete({session});
         })
 
         return {

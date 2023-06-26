@@ -33,6 +33,8 @@ export class GroupService extends DataBaseService<GroupDocument> {
     let group = user.groups.find((g) => g.id == groupId);
     contact.groups.push(group);
     group.contacts.push(contact);
+
+    console.log("Contact ",contact)
     await contact.save();
     await group.save();
     return true;
