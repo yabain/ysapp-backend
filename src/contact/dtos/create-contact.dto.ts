@@ -4,8 +4,8 @@ import { Transform, Type } from "class-transformer";
 
 /**
  * @apiDefine CreateContactDTO Creation d'un nouveau contact
- * @apiBody {String {4..65}} firstName Prenom du contact
- * @apiBody {String {4..65}} lastName Nom du contact
+ * @apiBody {String {1..65}} firstName Prenom du contact
+ * @apiBody {String {1..65}} lastName Nom du contact
  * @apiBody {String} [email] Email du contact
  * @apiBody {String} [profilePicture] Lien de la photo de profil du contact
  * @apiBody {String} [country] Pays d'habitation du contact
@@ -23,13 +23,13 @@ import { Transform, Type } from "class-transformer";
 export class CreateContactDTO
 {
     @IsNotEmpty()
-    @MinLength(4)
+    @MinLength(1)
     @MaxLength(65)
     @IsString()
     firstName:string;
 
     @IsNotEmpty()
-    @MinLength(4)
+    @MinLength(1)
     @IsString()
     @MaxLength(65)
     lastName:string;
@@ -64,7 +64,6 @@ export class CreateContactDTO
     websiteLink:string;
 
     @IsOptional()
-    @MinLength(4)
     @IsString()
     address:string;
 
@@ -84,8 +83,7 @@ export class CreateContactDTO
 
     @IsOptional()
     @IsString()
-    @MinLength(4)
-    @MaxLength(65)
+    @MaxLength(100)
     about:string;
 
     @IsOptional()

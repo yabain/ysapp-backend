@@ -29,6 +29,7 @@ export class MessageController
      * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
      * @apiUse apiError
      */
+    
     @Get("qr-code")
     async getQRCode(@Req() request:Request) 
     {
@@ -68,6 +69,16 @@ export class MessageController
      * 
      * @api {post} /message/post Envoi d'un nouveau message
      * @apiDescription Envoi d'un nouveau message. si le message n'est pas un message instantané l'envoi est programmé pour la date précisé dans les arguments de la requête
+     *  Des variables peuvent être ajouté les variables sont:
+     *   - userSenderName: Nom complet de l'emetteur du message
+     *   - userSenderEmail: Email de l'émetteur du message
+     *   - userReceiverName: Nom complet du recepteur du message
+     *   - userReceiverEmail: Email du recepteur du message
+     *   - date: date d'envoi du message. pour les messages instantané, la date est la date actuelle (Date.now()) et pour des dates ulterieurs, la date considéré est la date 
+     *         exacte de l'envoi du message envoyé par le client
+     *   - plateform: Nom de la plateforme utilisé pour envoyé le message. pour le cas d'éspece: Ysapp
+     *  Remarque: Les variables sount envoyé sous la forme {{nomDeVariable}}
+     *           
      * @apiName Envoi d'un nouveau message
      * @apiGroup Gestion de message
      * @apiUse apiSecurity
@@ -98,7 +109,7 @@ export class MessageController
         return {
             statusCode:HttpStatus.OK,
             message:"Messsage send successfully",
-            data:await this.messageService.postNewMessage(postNewMessageDTO,request["user"]["email"])
+            data:await this.messageService.postNewMessage(postNewMessageDTO,request["user"])
         }
     }
 

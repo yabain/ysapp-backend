@@ -296,7 +296,7 @@ export class GroupController
             })
         }
 
-        this.groupsService.executeWithTransaction(async (session)=> { 
+        await this.groupsService.executeWithTransaction(async (session)=> { 
             await  Promise.all(
                 group.contacts.map((contact)=>{
                     //retrait dans le groupe actuelle

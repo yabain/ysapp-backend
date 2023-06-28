@@ -8,11 +8,36 @@ import { UsersService } from "./services";
 import { PasswordUtil } from "./utils";
 import { JWT_CONSTANT } from "src/shared/config";
 import { SharedModule } from "src/shared/shared.module";
+import { MongooseError } from "mongoose";
 
 
 @Module({
     imports:[
-        MongooseModule.forFeature([{name:User.name,schema:UserSchema}]),
+        // MongooseModule.forFeature([{name:User.name,schema:UserSchema}]),
+        MongooseModule.forFeatureAsync([
+            {
+                name:User.name,
+                useFactory: ()=>{
+                    const schema = UserSchema
+                    schema.pre("save",function (next){
+                        let groupsMap = new Map();
+
+                        this.groups.forEach((group)=>{
+                            if(groupsMap.has(group.name)) return next(new MongooseError("Duplication de nom de groupe"));
+                            groupsMap.set(group.name,true);
+                        })
+
+                        let contactsMap = new Map();
+                        this.contacts.forEach((contact)=>{
+                            if(contactsMap.has(contact.phoneNumber)) return next(new MongooseError("Duplication de téléphone de contact"));
+                            contactsMap.set(contact.phoneNumber,1);
+                        })
+                        next();
+                    })
+                   
+                    return schema;
+                }
+            }]),
         JwtModule.register({
             secret:JWT_CONSTANT.secret,
             signOptions: { expiresIn: JWT_CONSTANT.expiresIn }

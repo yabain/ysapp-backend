@@ -3,6 +3,7 @@ import { Message } from "../models";
 
 export class MessageProcessing
 {
+    
     static replaceVar(text:string,varArray:Record<string,any>):string
     {
       Object.keys(varArray).forEach((key)=>text = text.replace(`%${key}%`, varArray.hasOwnProperty(key)?varArray[key]:`%${key}%`));
@@ -11,7 +12,7 @@ export class MessageProcessing
 
     static getVarList(text:string):string[]
     {
-        return Array.from(text.matchAll(/%([a-zA-Z]+)%/g)).map((varFound)=>varFound[1])
+        return Array.from(text.matchAll(/{{([a-zA-Z]+)}}/g)).map((varFound)=>varFound[1])
     }
   
     static extractPhoneID(phoneNumber:string)
@@ -19,20 +20,22 @@ export class MessageProcessing
       return phoneNumber.replace("+","").replace(" ","").replace("-","")
     }
 
-    static getVarListWithValues(message:Message,contact:Contact):Record<string,any>
+    static getVarListWithValues(message:Message,contact:Contact,sender):Record<string,any>
     {
         return {
-            // email:message.sender.email,
-            // senderName:`${message.sender.firstName} ${message.sender.lastName}`,
-            receiverName:`${contact.firstName} ${contact.lastName}`,
-            receiverEmail:contact.email
+            userSenderEmail:message.sender.email,
+            userSenderName:`${sender.firstName} ${sender.lastName}`,
+            userReceiverName:`${contact.firstName} ${contact.lastName}`,
+            userReceiverEmail:contact.email,
+            date:`${message.dateToSend.toLocaleDateString()}`,
+            plateform: "Ysapp"
         }
     }
 
-    static getPersonalizedMessage(message:Message,contact:Contact)
+    static getPersonalizedMessage(message:Message,contact:Contact,sender)
     {
         let text = message.body.text;
-        let varsValues = MessageProcessing.getVarListWithValues(message,contact);
+        let varsValues = MessageProcessing.getVarListWithValues(message,contact,sender);
         let varsList = MessageProcessing.getVarList(text);
         let values = {};
         varsList.forEach((varItem)=>{

@@ -25,10 +25,10 @@ export class MessageService extends DataBaseService<MessageDocument>
 
         }
 
-    async postNewMessage(postNewMessage:PostNewMessageDTO,email:string)
+    async postNewMessage(postNewMessage:PostNewMessageDTO,user)
     {
         let message = this.createInstance({});
-        message.sender = await this.userService.findOneByField({"email":email});
+        message.sender = await this.userService.findOneByField({"email":user.email});
         // console.log("message.sender ",message.sender,await this.userService.findOneByField({"email":email}),email)
         message.type = postNewMessage.type;
         message.isSentToNow = postNewMessage.isSentToNow;
@@ -43,12 +43,12 @@ export class MessageService extends DataBaseService<MessageDocument>
         if(postNewMessage.groupsID) message.groups = await Promise.all(postNewMessage.groupsID.map((groupId)=>this.groupService.findOneByField({"_id":groupId})));
         message.groups.forEach((group)=>message.contacts=[...message.contacts,...group.contacts])
         if(postNewMessage.dateToSend) message.dateToSend = postNewMessage.dateToSend;
-        if(message.isSentToNow) await this.whatsappAnnoucementService.sendMessage(message)
+        if(message.isSentToNow) await this.whatsappAnnoucementService.sendMessage(message,user)
         else {
             CronJobTask.newJobTask((params)=>{
-                this.whatsappAnnoucementService.sendMessage(params);
-                params.save()
-            },message,message.dateToSend);
+                this.whatsappAnnoucementService.sendMessage(params.message,params.sender);
+                params.message.save()
+            },{message,sender:user},message.dateToSend);
 
         }
         return message;

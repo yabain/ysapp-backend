@@ -64,14 +64,14 @@ export class WhatsappAnnouncementService {
         })
     }
 
-  sendMessage(message:Message):Promise<boolean>
+  sendMessage(message:Message,sender):Promise<boolean>
   {
     return new Promise<boolean>((resolve,reject)=>{
       let newWhatsappClient = this.getWhatsAppSession(message.sender);
       let body={file:null,text:""}, params = null;
       newWhatsappClient.on('ready',()=>{
         Promise.all(message.contacts.map(async (contact)=> {
-          body.text=  MessageProcessing.getPersonalizedMessage(message,contact);
+          body.text=  MessageProcessing.getPersonalizedMessage(message,contact,sender);
           if(message.body.fileUrl) body.file = await MessageMedia.fromUrl(message.body.fileUrl);
         
           // console.log("body ",body);
