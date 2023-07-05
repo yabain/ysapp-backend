@@ -27,7 +27,7 @@ export class MessageProcessing
             userSenderName:`${sender.firstName} ${sender.lastName}`,
             userReceiverName:`${contact.firstName} ${contact.lastName}`,
             userReceiverEmail:contact.email,
-            date:`${message.dateToSend.toLocaleDateString()}`,
+            date:`${(message.dateToSend?new Date(message.dateToSend):new Date()).toLocaleDateString()}`,
             plateform: "Ysapp"
         }
     }

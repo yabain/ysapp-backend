@@ -1,12 +1,12 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { JwtModule } from "@nestjs/jwt";
+// import { JwtModule } from "@nestjs/jwt";
 import { UserController, UserProfilController } from "./controllers";
 import { User, UserDocument, UserSchema } from "./models";
 import { UsersService } from "./services";
 
 import { PasswordUtil } from "./utils";
-import { JWT_CONSTANT } from "src/shared/config";
+// import { JWT_CONSTANT } from "src/shared/config";
 import { SharedModule } from "src/shared/shared.module";
 import { MongooseError } from "mongoose";
 
@@ -38,10 +38,10 @@ import { MongooseError } from "mongoose";
                     return schema;
                 }
             }]),
-        JwtModule.register({
-            secret:JWT_CONSTANT.secret,
-            signOptions: { expiresIn: JWT_CONSTANT.expiresIn }
-        }),
+        // JwtModule.register({
+        //     secret:JWT_CONSTANT.secret,
+        //     signOptions: { expiresIn: JWT_CONSTANT.expiresIn }
+        // }),
         SharedModule
     ],
     controllers:[UserProfilController,UserController],

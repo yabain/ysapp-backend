@@ -7,6 +7,7 @@ import { MessageController } from './controllers';
 import { UserModule } from 'src/user/user.module';
 import { ContactModule } from 'src/contact/contact.module';
 import { GroupModule } from 'src/group';
+import { MessageGateWayWS } from './ws-gateway';
 
 @Module({
   controllers: [
@@ -23,7 +24,8 @@ import { GroupModule } from 'src/group';
   ],
   providers: [
     WhatsappAnnouncementService,
-    MessageService
+    MessageService,
+    MessageGateWayWS
   ],
   exports: [],
 })

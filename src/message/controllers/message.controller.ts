@@ -14,31 +14,7 @@ export class MessageController
         ){}
 
 
-    /**
-     * 
-     * @api {get} /message/qr-code Génération d'un nouveau QR-Code
-     * @apiDescription Génération d'un noveau QR-Code basé sur les informations de l'utilisateur courant
-     * @apiName Génération d'un nouveau QR-Code
-     * @apiGroup Gestion de message
-     * @apiUse apiSecurity
-     * @apiUse apiDefaultResponse
-     * 
-     * @apiSuccess (200 Ok) {Number} statusCode status code
-     * @apiSuccess (200 Ok) {String} Response Description
-     * @apiSuccess (200 Ok) {String} data QR-Code générer sous forme de chaine de carractére
-     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
-     * @apiUse apiError
-     */
-    
-    @Get("qr-code")
-    async getQRCode(@Req() request:Request) 
-    {
-        return {
-            statusCode:HttpStatus.OK,
-            message:"Qr-Code generated successfully",
-            data:await this.whatsAppAnnouncementService.initWhatsAppSession(request["user"]["email"])
-        }
-    }
+   
 
      /**
      * 

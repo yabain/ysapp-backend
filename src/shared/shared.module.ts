@@ -29,7 +29,12 @@ import { UserAuthGuard } from "src/user/guards";
               realm: configService.get("KEYCLOAK_SERVER_REALM"),
               clientId: configService.get("KEYCLOAK_SERVER_CLIENT_ID"),
               secret: configService.get("KEYCLOAK_SERVER_SECRET"),   
-              bearerOnly:true
+              bearerOnly:true,
+              multiTenant: {
+                realmResolver: (request) => {
+                  return request.get('host').split('.')[0];
+                }
+              },
             })
         })
     ],    

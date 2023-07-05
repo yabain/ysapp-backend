@@ -43,4 +43,5 @@ export class PostNewMessageDTO
     @Type(()=>MessageBodyDTO)
     body:MessageBodyDTO ;
 
+    email:string
 }

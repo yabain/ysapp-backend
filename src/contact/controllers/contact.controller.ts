@@ -248,7 +248,7 @@ export class ContactController
                     }
                     return Promise.resolve();
                 }))   
-                return await  contact.delete({session});  
+                return await  this.contactsService.delete({_id:contact._id},session);  
             })
                       
         })
@@ -299,7 +299,7 @@ export class ContactController
                 return Promise.resolve();
             }))
 
-            return await contact.delete({session});
+            return await this.contactsService.delete({_id:contact._id},session);
         })
 
         return {

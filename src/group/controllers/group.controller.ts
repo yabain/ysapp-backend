@@ -319,7 +319,7 @@ export class GroupController
             )   
             
             //suppression du groupe
-            group.delete({session});
+            this.groupsService.delete({"_id":group._id},session);
             return {
                 statusCode:HttpStatus.OK,
                 message:"Group deleted successfully",
