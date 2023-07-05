@@ -18,7 +18,7 @@ export class WhatsappAnnouncementService {
   async getNewClientWhatsAppSession(userEmail)
   {
     let userFound = await this.userService.findOneByField({email:userEmail});
-    console.log("userFound ",userFound)
+    // console.log("userFound ",userFound)
     if(this.clientsWhatsApp.has(userFound._id.toString())) return this.clientsWhatsApp.get(userFound._id.toString());
     let newWhatsappClient = new WhatsappClientServiceWS(this.userService,userFound);
     await newWhatsappClient.getWhatsAppSession()

@@ -5,7 +5,7 @@ import configuration from "./config/configuration";
 import { SecurityModule } from "./security/security.module";
 import { AuthGuard, KeycloakConnectModule, ResourceGuard, RoleGuard } from "nest-keycloak-connect";
 import { APP_GUARD } from "@nestjs/core";
-import { UserAuthGuard } from "src/user/guards";
+
 
 @Module({
     imports:[
@@ -29,12 +29,7 @@ import { UserAuthGuard } from "src/user/guards";
               realm: configService.get("KEYCLOAK_SERVER_REALM"),
               clientId: configService.get("KEYCLOAK_SERVER_CLIENT_ID"),
               secret: configService.get("KEYCLOAK_SERVER_SECRET"),   
-              bearerOnly:true,
-              multiTenant: {
-                realmResolver: (request) => {
-                  return request.get('host').split('.')[0];
-                }
-              },
+              bearerOnly:true
             })
         })
     ],    

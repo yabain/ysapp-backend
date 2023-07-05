@@ -1,7 +1,6 @@
 import { Controller, UseGuards,Get, Req, Param, Body, Delete, HttpStatus, NotFoundException, Put } from "@nestjs/common";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { Request } from "express"
-import { UserAuthGuard } from "../guards";
 import { UpdateUserDTO } from "../dtos";
 import { UsersService } from "../services";
 import { Resource, Scopes } from "nest-keycloak-connect";

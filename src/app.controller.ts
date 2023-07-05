@@ -8,6 +8,6 @@ export class AppController
     @Get()
     get()
     {
-        return `Yaba-In Payment Gateway API (Y-Nkap) ${this.configService.get<string>("NODE_ENV")} Version 1.0.0`
+        return `Yaba-In Payment Gateway API (Y-Nkap) ${this.configService.get<string>("NODE_ENV")} Version 1.0.1`
     }
 }
