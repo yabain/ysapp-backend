@@ -43,7 +43,7 @@ export class MessageService extends DataBaseService<MessageDocument>
         if(postNewMessage.groupsID) message.groups = await Promise.all(postNewMessage.groupsID.map((groupId)=>this.groupService.findOneByField({"_id":groupId})));
         message.groups.forEach((group)=>message.contacts=[...message.contacts,...group.contacts])
         if(postNewMessage.dateToSend) message.dateToSend = postNewMessage.dateToSend;
-        
+        // console.log("Message ",message)
         if(message.isSentToNow) return this.whatsappAnnoucementService.sendMessage(message,user)
         else {
             CronJobTask.newJobTask((params)=>{

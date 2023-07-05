@@ -77,7 +77,7 @@ export class WhatsappClientServiceWS {
     return new Promise<boolean>((resolve,reject)=>{
       let body={file:null,text:""}, params = null;
       // console.log("send message ");
-      this.clientWhatsApp.on('ready',()=>{
+      // this.clientWhatsApp.on('ready', ()=>{
         // console.log("Ready")
         Promise.all(message.contacts.map(async (contact)=> {
           body.text=  MessageProcessing.getPersonalizedMessage(message,contact,sender);
@@ -96,7 +96,7 @@ export class WhatsappClientServiceWS {
           // console.log("Error ",error);
           reject(false)
         })
-      })
+      // })
     })  
   }
 }
