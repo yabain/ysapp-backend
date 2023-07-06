@@ -8,7 +8,8 @@ import { UsersService } from "./services";
 import { PasswordUtil } from "./utils";
 // import { JWT_CONSTANT } from "src/shared/config";
 import { SharedModule } from "src/shared/shared.module";
-import { MongooseError } from "mongoose";
+import { MongoServerError } from "mongodb";
+// import { MongooseError } from "mongoose";
 
 
 @Module({
@@ -23,13 +24,13 @@ import { MongooseError } from "mongoose";
                         let groupsMap = new Map();
 
                         this.groups.forEach((group)=>{
-                            if(groupsMap.has(group.name)) return next(new MongooseError("Duplication de nom de groupe"));
+                            if(groupsMap.has(group.name)) return next(new MongoServerError({message:"Duplication de nom de groupe"}));
                             groupsMap.set(group.name,true);
                         })
 
                         let contactsMap = new Map();
                         this.contacts.forEach((contact)=>{
-                            if(contactsMap.has(contact.phoneNumber)) return next(new MongooseError("Duplication de téléphone de contact"));
+                            if(contactsMap.has(contact.phoneNumber)) return next(new MongoServerError({message:"Duplication de téléphone de contact"}));
                             contactsMap.set(contact.phoneNumber,1);
                         })
                         next();

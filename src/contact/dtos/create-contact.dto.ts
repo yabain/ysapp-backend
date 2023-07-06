@@ -68,7 +68,7 @@ export class CreateContactDTO
     address:string;
 
     @IsOptional()
-    @IsMobilePhone()
+    // @IsMobilePhone()
     phoneNumber:string
 
     @IsOptional()

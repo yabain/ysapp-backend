@@ -1,10 +1,14 @@
-import { Body, Controller, Post, UseGuards,Req, HttpStatus, Get, Param, ParseUUIDPipe, Put, Delete, NotFoundException } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards,Req, HttpStatus, Get, Param, ParseUUIDPipe, Put, Delete, NotFoundException, UnprocessableEntityException, UseInterceptors, UploadedFiles } from "@nestjs/common";
 import { Request } from "express";
 import { CreateContactDTO, DeleteContactsDTO, UpdateContactDTO } from "../dtos";
 import { ContactsService } from "../services";
 import { UsersService } from "src/user/services";
 import { GroupService } from "src/group/services/group.service";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
+import { FilesInterceptor } from "@nestjs/platform-express";
+import * as path from "path";
+import { Readable } from "stream";
+import * as Papa from "papaparse"
 
 
 
@@ -62,6 +66,66 @@ export class ContactController
             data
         }        
     }
+
+    /**
+     * 
+     * @api {post} /contacts/import Importer une liste de contacts
+     * @apiDescription Importation d'un liste de contact contenu dans un fichier au format csv. Le contenu du fichier csv
+     *   contient les colones suivantes: 
+     *   `firstName,lastName,email,profilePicture,phoneNumber,gender,country,whatsappContact,websiteLink,address,birthday,about,organization,city`
+     * @apiName Importation de contacts
+     * @apiGroup Gestion de contact
+     * @apiUse apiSecurity
+     * @apiUse apiDefaultResponse
+     * @apiUse CreateContactDTO
+     * 
+     * @apiSuccess (201 Created) {Number} statusCode status code
+     * 
+     * @apiSuccess (201 Created) {Number} statusCode status code
+     * @apiSuccess (201 Created) {String} Response Description
+     
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiUse apiError
+     * 
+     */
+    @Post("import")
+    @UseInterceptors(FilesInterceptor('files',20,{
+        fileFilter:(req, file, callback) => {
+            let ext = path.extname(file.originalname);
+            if (!['.csv'].includes(ext.toLowerCase())) {
+              return callback(new UnprocessableEntityException({
+                statusCode:HttpStatus.UNPROCESSABLE_ENTITY,
+                error:"Unprocessable entity",
+                message:['Invalid file type']
+            }), false);
+            }
+          
+            return callback(null, true);
+          }
+    }))   
+    async addContacts(@UploadedFiles() files:Express.Multer.File[],@Req() request:Request,)
+    {
+        //format:
+        let data:any = await new Promise((resolve,reject)=>{
+            Papa.parse(Readable.from(files[0].buffer), {
+                header: true,
+                skipEmptyLines:true,
+                transformHeader: (header)=>header.toLowerCase(),
+                complete:(results)=>{
+                    resolve(results.data)                    
+                },
+                errors: (error)=>reject(error)
+              });
+
+        })
+        await this.contactsService.createBulkContact(data,request["user"]['email'])
+        return {
+            statusCode:HttpStatus.CREATED,
+            message:"Liste de contact importé avec succés",
+        }
+    }
+
 
     /**
      * 
