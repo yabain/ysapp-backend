@@ -74,8 +74,8 @@ export class WhatsappAnnouncementService {
           if(message.body.fileUrl) body.file = await MessageMedia.fromUrl(message.body.fileUrl);
         
           // console.log("body ",body);
-          if(!body.file) return newWhatsappClient.sendMessage(MessageProcessing.extractPhoneID(`${contact.phoneNumber}@c.us`),body.text);
-          return newWhatsappClient.sendMessage(MessageProcessing.extractPhoneID(`${contact.phoneNumber}@c.us`),body.file,{
+          if(!body.file) return newWhatsappClient.sendMessage(MessageProcessing.extractPhoneID(`${contact.phoneNumbers[0]}@c.us`),body.text);
+          return newWhatsappClient.sendMessage(MessageProcessing.extractPhoneID(`${contact.phoneNumbers[0]}@c.us`),body.file,{
             caption:body.text
           });
         }))

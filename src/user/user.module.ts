@@ -30,8 +30,11 @@ import { MongoServerError } from "mongodb";
 
                         let contactsMap = new Map();
                         this.contacts.forEach((contact)=>{
-                            if(contactsMap.has(contact.phoneNumber)) return next(new MongoServerError({message:"Duplication de téléphone de contact"}));
-                            contactsMap.set(contact.phoneNumber,1);
+                            contact.phoneNumbers.forEach(phone => {
+                                if(contactsMap.has(phone)) return next(new MongoServerError({message:"Duplication de téléphone de contact"}));
+                                contactsMap.set(phone,1);
+                            });
+                            
                         })
                         next();
                     })

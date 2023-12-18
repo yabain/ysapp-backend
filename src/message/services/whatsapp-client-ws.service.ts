@@ -5,6 +5,7 @@ import { MessageProcessing } from '../utils';
 import { User, UserDocument } from 'src/user/models';
 import { Client,  LocalAuth, MessageMedia, RemoteAuth } from 'whatsapp-web.js';
 import { UsersService } from 'src/user/services';
+import { ContactExtractData } from '../utils/contact-extract-data';
 
 export class WhatsappClientServiceWS {
   clientWhatsApp: any = null;  
@@ -41,8 +42,9 @@ export class WhatsappClientServiceWS {
   onQrCode(handlerFunction:(qrCode:string)=>void)
   {
     this.clientWhatsApp.on('qr',(qrCode)=>{
-      // console.log("get qr")
-      if(!this.user.hasSyncWhatsApp) handlerFunction(qrCode);
+      console.log("get qr")
+      // if(!this.user.hasSyncWhatsApp) 
+      handlerFunction(qrCode);
     });
   }
 
@@ -59,7 +61,7 @@ export class WhatsappClientServiceWS {
 
   onAuthenticated(handlerFunction:(user:Record<string,any>)=>void)
   {
-    //Bug: utilsé le mot 'on' pour gérer le cas d'une connexion, déconnexion et reconnexion
+    //Bug: utilisé le mot 'on' pour gérer le cas d'une connexion, déconnexion et reconnexion
     this.clientWhatsApp.on('authenticated',async (session)=>{
       // console.log("Auth")
       if(!this.user.hasSyncWhatsApp)
@@ -82,9 +84,11 @@ export class WhatsappClientServiceWS {
         Promise.all(message.contacts.map(async (contact)=> {
           body.text=  MessageProcessing.getPersonalizedMessage(message,contact,sender);
           if(message.body.fileUrl) body.file = await MessageMedia.fromUrl(message.body.fileUrl);
-     
-          if(!body.file) return this.clientWhatsApp.sendMessage(MessageProcessing.extractPhoneID(`${contact.phoneNumber}@c.us`),body.text);
-          return this.clientWhatsApp.sendMessage(MessageProcessing.extractPhoneID(`${contact.phoneNumber}@c.us`),body.file,{
+          // let contactUSer = await this.clientWhatsApp.getContactById(MessageProcessing.extractPhoneID(`${contact.phoneNumber}@c.us`))
+          let contactUSer = await this.clientWhatsApp.getNumberId(MessageProcessing.extractPhoneID(`${ContactExtractData.getWhatsappPhone(contact)}@c.us`))
+          console.log("Contact ",contactUSer)
+          if(!body.file) return this.clientWhatsApp.sendMessage(contactUSer,body.text);
+          return this.clientWhatsApp.sendMessage(contactUSer,body.file,{
             caption:body.text
           });
         }))
@@ -93,7 +97,7 @@ export class WhatsappClientServiceWS {
           resolve(true)
         })
         .catch((error)=>{
-          // console.log("Error ",error);
+          console.log("Error ",error);
           reject(false)
         })
       // })

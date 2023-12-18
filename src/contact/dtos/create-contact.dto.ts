@@ -1,5 +1,7 @@
-import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, Matches, IsPhoneNumber, IsMobilePhone, IsFQDN, IsDate, Max } from "class-validator";
+import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, IsArray, ArrayMinSize, IsMobilePhone, IsFQDN, IsDate, Max, IsEmail, ValidateNested } from "class-validator";
 import { Transform, Type } from "class-transformer";
+import { PhoneNumberDTO } from "./phone-number.dto";
+import { ContactEmailDTO } from "./contact-email.dto";
 
 
 /**
@@ -23,21 +25,29 @@ import { Transform, Type } from "class-transformer";
 export class CreateContactDTO
 {
     @IsNotEmpty()
-    @MinLength(1)
-    @MaxLength(65)
     @IsString()
-    firstName:string;
+    fullName:string;
 
-    @IsNotEmpty()
-    @MinLength(1)
-    @IsString()
-    @MaxLength(65)
-    lastName:string;
+    @IsArray()
+    @ValidateNested({each:true})
+    @ArrayMinSize(1)
+    @Type(()=> ContactEmailDTO)
+    emails:ContactEmailDTO[];
+
+    @IsArray()
+    @ValidateNested({each:true})
+    @ArrayMinSize(1)
+    @Type(()=> PhoneNumberDTO)
+    phoneNumbers:PhoneNumberDTO[]
 
     @IsOptional()
     @IsString()
-    @Matches("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])")
-    email:string;
+    @MaxLength(65)
+    skype:string;
+
+    @IsOptional()
+    @IsUrl()
+    websiteLink:string;
 
     @IsOptional()
     @IsString()
@@ -45,47 +55,19 @@ export class CreateContactDTO
     profilePicture:string;
 
     @IsOptional()
-    @MinLength(4)
-    @IsString()
-    country:string;
-
-    @IsOptional()
-    @IsMobilePhone()
-    whatsappContact:string;
-
-    @IsOptional()
-    @MinLength(4)
-    @IsString()
-    @MaxLength(65)
-    skype:string;
-
-    @IsOptional()
-    @IsFQDN()
-    websiteLink:string;
-
-    @IsOptional()
     @IsString()
     address:string;
-
-    @IsOptional()
-    // @IsMobilePhone()
-    phoneNumber:string
-
-    @IsOptional()
-    @MinLength(4)
-    @MaxLength(8)
-    gender:string;
-
-    @IsOptional()
-    @Transform(({value})=> value && new Date(value))
-    @IsDate()
-    birthday:Date;
-
+   
     @IsOptional()
     @IsString()
     @MaxLength(100)
     about:string;
-
+    
+    @IsOptional()
+    @IsString()
+    @MaxLength(100)
+    jobTitle:string;
+    
     @IsOptional()
     @IsString()
     @MinLength(2)
@@ -94,7 +76,11 @@ export class CreateContactDTO
 
     @IsOptional()
     @IsString()
-    @MinLength(2)
-    @MaxLength(65)
-    city:string
+    @MaxLength(64)
+    company:string;
+    
+    @IsOptional()
+    @Transform(({value})=> value && new Date(value))
+    @IsDate()
+    birthday:Date;
 }

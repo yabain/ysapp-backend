@@ -1,5 +1,6 @@
 import { Contact } from "src/contact/models";
 import { Message } from "../models";
+import { ContactExtractData } from "./contact-extract-data";
 
 export class MessageProcessing
 {
@@ -25,8 +26,8 @@ export class MessageProcessing
         return {
             userSenderEmail:message.sender.email,
             userSenderName:`${sender.firstName} ${sender.lastName}`,
-            userReceiverName:`${contact.firstName} ${contact.lastName}`,
-            userReceiverEmail:contact.email,
+            userReceiverName:`${contact.fullName}`,
+            userReceiverEmail: ContactExtractData.getDefaultMail(contact),
             date:`${(message.dateToSend?new Date(message.dateToSend):new Date()).toLocaleDateString()}`,
             plateform: "Ysapp"
         }

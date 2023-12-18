@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { Document, HydratedDocument } from "mongoose";
+import { PhoneNumber } from "./phone-number.schema";
+import { ContactEmail } from "./contact-email.schema";
 
 
 export type ContactDocument = HydratedDocument<Contact>;
@@ -7,25 +9,16 @@ export type ContactDocument = HydratedDocument<Contact>;
 @Schema({})
 export class Contact extends Document
 {
-    @Prop({required:true,default:""})
-    firstName:string;
 
     @Prop({required:true,default:""})
-    lastName:string;
+    fullName:string;
 
     // ,
-    @Prop({
-        match:/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-        // unique:true
-        default:""
-    })
-    email:string;
+    @Prop({type: Array<ContactEmail>,default:[]})
+    emails:ContactEmail[];
 
-    @Prop({default:""})
-    phoneNumber:string;
-
-    @Prop({default:""})
-    whatsappContact:string;
+    @Prop({type: Array<PhoneNumber>,default:[]})
+    phoneNumbers:PhoneNumber[];    
 
     @Prop({default:""})
     skype:string;
@@ -37,22 +30,19 @@ export class Contact extends Document
     profilePicture:string;
 
     @Prop({default:""})
-    country:string;
-
-    @Prop({default:""})
     address:string;
-
-    @Prop({default:""})
-    gender:string;
 
     @Prop({default:""})
     about:string;
 
     @Prop({default:""})
+    jobTitle:string;
+
+    @Prop({default:""})
     organization:string;
 
     @Prop({default:""})
-    city:string;
+    company:string;
 
     @Prop({default:Date.now()})
     birthday:Date;

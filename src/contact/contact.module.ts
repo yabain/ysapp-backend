@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { UserModule } from "src/user/user.module";
 import { ContactController } from "./controllers";
-import { Contact, ContactSchema } from "./models";
+import { Contact, ContactEmail, ContactEmailSchema, ContactSchema, PhoneNumber, PhoneNumberSchema } from "./models";
 import { ContactsService } from "./services";
 import { GroupModule } from "src/group";
 
@@ -10,7 +10,9 @@ import { GroupModule } from "src/group";
     controllers:[ContactController],
     imports:[
         MongooseModule.forFeature([
-        {name:Contact.name,schema:ContactSchema}
+        {name:Contact.name,schema:ContactSchema},
+        // {name:ContactEmail.name,schema:ContactEmailSchema},
+        // {name:PhoneNumber.name,schema:PhoneNumberSchema},
     ]),
         UserModule,
         GroupModule

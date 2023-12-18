@@ -18,14 +18,12 @@ export class MessageGateWayWS
     @SubscribeMessage('send-message')
     async handleQrCode(@MessageBody() data:PostNewMessageDTO, @ConnectedSocket() client:Socket)
     {
-      console.log("data",data);
+      // console.log("data",data);
       this.messageService.postNewMessage(data,{email:data.email})
       .then((result)=> client.emit("send-message",true))
       .catch((error)=>client.emit("send-message",false))
-      
     }  
-
-    
+   
 
     @SubscribeMessage('connexion')
     async handleNewClientConnexion(@MessageBody('email') email:string, @ConnectedSocket() client:Socket)
