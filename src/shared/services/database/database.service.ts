@@ -46,24 +46,9 @@ export abstract class DataBaseService<T extends Document>
         await this.entityModel.findOneAndDelete(filter,{session});
     }
 
-    async executeWithTransaction(functionToExecute:(session:ClientSession)=>any)
+    async executeWithTransaction(functionToExecute:(session:ClientSession)=>any):Promise<any>
     {
-        const transaction:ClientSession= await this.connection.startSession();
-        transaction.startTransaction();
-        let result=null;
-        try {    
-            result= await functionToExecute(transaction);
-            await transaction.commitTransaction();
-        } 
-        catch(err)
-        {
-            await transaction.abortTransaction();
-            throw err
-        }
-        finally
-        {
-            transaction.endSession();
-        }     
-        return  result;
+        const transaction:ClientSession= await this.connection.startSession();   
+        return transaction.withTransaction(()=>functionToExecute(transaction))
     }
 }

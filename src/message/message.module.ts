@@ -7,7 +7,7 @@ import { MessageController } from './controllers';
 import { UserModule } from 'src/user/user.module';
 import { ContactModule } from 'src/contact/contact.module';
 import { GroupModule } from 'src/group';
-import { MessageGateWayWS } from './ws-gateway';
+import { HandleConnexionGatewayWS, MessageGateWayWS } from './ws-gateway';
 
 @Module({
   controllers: [
@@ -23,9 +23,11 @@ import { MessageGateWayWS } from './ws-gateway';
   ]),
   ],
   providers: [
-    WhatsappAnnouncementService,
+    
     MessageService,
-    MessageGateWayWS
+    MessageGateWayWS,
+    HandleConnexionGatewayWS,
+    // WhatsappAnnouncementService
   ],
   exports: [],
 })

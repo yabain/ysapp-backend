@@ -34,13 +34,15 @@ import { APP_GUARD } from "@nestjs/core";
         })
     ],    
     providers: [
+
       
     ],
     exports:[
       SecurityModule,
       ConfigModule,
       MongooseModule,
-      KeycloakConnectModule
+      KeycloakConnectModule,
+
   ],
 })
 export class SharedModule{}

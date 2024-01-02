@@ -5,6 +5,7 @@ import { ContactController } from "./controllers";
 import { Contact, ContactEmail, ContactEmailSchema, ContactSchema, PhoneNumber, PhoneNumberSchema } from "./models";
 import { ContactsService } from "./services";
 import { GroupModule } from "src/group";
+import { WhatsappAnnouncementService } from "src/message/services";
 
 @Module({
     controllers:[ContactController],
@@ -17,7 +18,10 @@ import { GroupModule } from "src/group";
         UserModule,
         GroupModule
     ],
-    providers:[ContactsService],
-    exports:[ContactsService]
+    providers:[
+        ContactsService,
+        WhatsappAnnouncementService
+    ],
+    exports:[ContactsService,WhatsappAnnouncementService]
 })
 export class ContactModule{}

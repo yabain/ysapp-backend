@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards,Req, HttpStatus, Get, Param, ParseUUIDPipe, Put, Delete, NotFoundException, UnprocessableEntityException, UseInterceptors, UploadedFiles } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards,Req, HttpStatus, Get, Param, ParseUUIDPipe,MethodNotAllowedException, Put, Delete,NotFoundException, UnprocessableEntityException, UseInterceptors, UploadedFiles } from "@nestjs/common";
 import { Request } from "express";
 import { CreateContactDTO, DeleteContactsDTO, UpdateContactDTO } from "../dtos";
 import { ContactsService } from "../services";
@@ -9,13 +9,21 @@ import { FilesInterceptor } from "@nestjs/platform-express";
 import * as path from "path";
 import { Readable } from "stream";
 import * as Papa from "papaparse"
+import { WhatsappClientServiceWS } from "src/message/services/whatsapp-client-ws.service";
+import { WhatsappAnnouncementService } from "src/message/services";
+import { Contact } from "whatsapp-web.js";
 
 
 
 @Controller("contacts")
 export class ContactController
 {
-    constructor(private contactsService:ContactsService,private usersService:UsersService,private groupService:GroupService){}
+    constructor(
+        private contactsService:ContactsService,
+        private usersService:UsersService,
+        private groupService:GroupService, 
+        private whatsappAnnouncementService:WhatsappAnnouncementService
+    ){}
 
     /**
      * 
@@ -370,11 +378,47 @@ export class ContactController
             statusCode:HttpStatus.OK,
             message:"Contact supprimé avec success"
         }
-
-
     }
-    
 
+    @Post("sync-whatsapp")
+    async syncContactFromWhatsapp(@Req() request:Request)
+    {
+        let user = await this.usersService.findOneByField({email:request["user"]["email"]});
+        console.log("client ",this.whatsappAnnouncementService.clientsWhatsApp.size)
+        if(!this.whatsappAnnouncementService.clientsWhatsApp.has(user._id.toString())) throw new NotFoundException({
+            statusCode: 404,
+            error:"UserSync/NotFound",
+            message:["User sync not found"]
+        })
 
+        let userWhatsappSync:WhatsappClientServiceWS = this.whatsappAnnouncementService.clientsWhatsApp.get(user._id.toString());
+        if(!(await userWhatsappSync.isConnected())) throw new MethodNotAllowedException({
+            statusCode: HttpStatus.METHOD_NOT_ALLOWED,
+            error:"UserSync/NotFound",
+            message:["User sync not found"]
+        })
 
+        let userContactLists:any[] = await userWhatsappSync.getContacts();
+        
+        await this.contactsService.createBulkContact(userContactLists.map((contact)=>{
+            return {
+                fullName:contact.name,
+                avatar:contact.avatar,
+                emails:[],
+                phoneNumbers:[{phoneNumber:contact.number,label:"whatsapp",country:contact.countryCode}],
+                websiteLink:"",
+                address:"",
+                birthday:"",
+                about:"",
+                jobTitle:"",
+                organization:"",
+                company:""
+            }
+        }),user.email);
+
+        return {
+            statusCode:HttpStatus.OK,
+            message:"Contacts synchronisés avec success"
+        }
+    }  
 }

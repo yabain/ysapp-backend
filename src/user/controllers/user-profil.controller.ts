@@ -16,9 +16,9 @@ export class UserProfilController
     ){}
     
     /**
-     * @api {post} /user/profil/:id Get user by id
-     * @apidescription Get user details by id
-     * @apiParam {String} id User unique ID
+     * @api {post} /user/profil/:email Get user by email
+     * @apidescription Get user details by email
+     * @apiParam {String} email User unique email
      * @apiName Get profil
      * @apiGroup User
      * @apiUse apiSecurity
@@ -41,11 +41,11 @@ export class UserProfilController
      * @apiError (Error 4xx) 404-NotFound User not found
      * @apiUse apiError
      */
-    @Get(":id")
-    @Scopes("View")
-    async getUserProfilById( @Param("id",ObjectIDValidationPipe) id:string)
+    @Get(":email")
+    // @Scopes("View")
+    async getUserProfilByEmail( @Param("email") email:string)
     {
-        let data = await this.userService.findOneByField({"_id":id})
+        let data = await this.userService.findOneByField({"email":email})
         if(!data) throw new NotFoundException({
             statusCode: 404,
             error:"NotFound",

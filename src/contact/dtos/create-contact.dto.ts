@@ -52,7 +52,7 @@ export class CreateContactDTO
     @IsOptional()
     @IsString()
     @IsUrl()
-    profilePicture:string;
+    avatar:string;
 
     @IsOptional()
     @IsString()
@@ -78,7 +78,7 @@ export class CreateContactDTO
     @IsString()
     @MaxLength(64)
     company:string;
-    
+
     @IsOptional()
     @Transform(({value})=> value && new Date(value))
     @IsDate()

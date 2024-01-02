@@ -27,29 +27,38 @@ export class ContactsService extends DataBaseService<ContactDocument>
         return contact.save();
     }
 
-    async createBulkContact(data: {
-        firstname:String,lastname:String,email:String,profilepicture:String,phonenumber:String,gender:String
-        country:String,whatsappcontact:string,websitelink:string,address:String,birthday:String,about:String,
-        organization:String,city:String}[],
+    async createBulkContact(
+        data: {
+            fullName:String,
+            emails:{email:string,label:string}[],
+            avatar:String,
+            phoneNumbers:{phoneNumber:string,label:string,country:string}[],
+            websiteLink:string,
+            address:String,
+            birthday:String,
+            about:String,
+            jobTitle:string,
+            organization:string,
+            company:string
+        }[],
         userEmail:String
     ) {
         let user= await this.usersService.findOneByField({email:userEmail});
         return this.executeWithTransaction(async (session)=>{
             await Promise.all(data.map((contact)=>{
-                if(contact.firstname.trim()=="" ||  contact.lastname.trim()=="") return Promise.resolve();
+                if(user.contacts.findIndex((fcountact)=>fcountact.fullName==contact.fullName)>-1) return true;
                 let newContactModel= this.createInstance({
-                    firstName:contact.firstname,
-                    lastName:contact.lastname,
-                    email:contact.email,
-                    profilePicture:contact.profilepicture,
-                    phoneNumber:contact.phonenumber,
-                    country:contact.country,
-                    whatsappContact:contact.whatsappcontact,
-                    websiteLink:contact.websitelink,
+                    fullName:contact.fullName,
+                    emails:contact.emails,
+                    avatar:contact.avatar,
+                    phoneNumbers:contact.phoneNumbers,
                     address:contact.address,
                     birthday:contact.birthday,
-                    about:contact.about
-
+                    about:contact.about,
+                    websiteLink:contact.websiteLink,
+                    jobTitle:contact.jobTitle,
+                    organization:contact.organization,
+                    company:contact.company
                 });
                 user.contacts.push(newContactModel);
                 return newContactModel.save({session})

@@ -27,7 +27,7 @@ export class Contact extends Document
     websiteLink:string;
 
     @Prop({default:""})
-    profilePicture:string;
+    avatar:string;
 
     @Prop({default:""})
     address:string;

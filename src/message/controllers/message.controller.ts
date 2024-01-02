@@ -1,7 +1,7 @@
 import { Controller, Post, UseGuards, Body, HttpStatus, Req,Get } from "@nestjs/common";
 import { Request } from "express";
 import { PostNewMessageDTO } from "../dtos";
-import { MessageService, WhatsappAnnouncementService } from "../services";
+import { MessageService, WhatsappAnnouncementService} from "../services";
 import { UsersService } from "src/user/services";
 
 @Controller("message")
