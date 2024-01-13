@@ -380,6 +380,23 @@ export class ContactController
         }
     }
 
+    /**
+     * 
+     * @api {post} /contacts/sync-whatsapp Synchronization  de contact
+     * @apiDescription Synchroniser les contacts depuis whatsapp
+     * @apiName Synchronisation de contact
+     * @apiGroup Gestion de contact
+     * @apiUse apiSecurity
+     * @apiUse apiDefaultResponse
+     * 
+     * @apiSuccess (200 Ok) {Number} statusCode status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiUse apiError
+     * 
+     */
+
     @Post("sync-whatsapp")
     async syncContactFromWhatsapp(@Req() request:Request)
     {
@@ -399,7 +416,7 @@ export class ContactController
         })
 
         let userContactLists:any[] = await userWhatsappSync.getContacts();
-        
+
         await this.contactsService.createBulkContact(userContactLists.map((contact)=>{
             return {
                 fullName:contact.name,

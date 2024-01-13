@@ -10,6 +10,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ResourceGuard, RoleGuard } from 'nest-keycloak-connect';
 import { UserAuthGuard } from './user/guards';
 import { MessageModule } from './message/message.module';
+import { MessageTemplateModule } from './message-template/message-template.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { MessageModule } from './message/message.module';
     UserModule,
     ContactModule,
     MessageModule,
-    GroupModule
+    GroupModule,
+    MessageTemplateModule
   ],
   controllers: [
     AppController
