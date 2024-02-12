@@ -45,9 +45,9 @@ export class ContactsService extends DataBaseService<ContactDocument>
     ) {
         let user= await this.usersService.findOneByField({email:userEmail});
         return this.executeWithTransaction(async (session)=>{
-            await Promise.all(data.map((contact)=>{
-                if(user.contacts.findIndex((fcountact)=>fcountact.fullName==contact.fullName)>-1) return true;
-                let newContactModel= this.createInstance({
+            await Promise.all(data.map(async (contact)=>{
+                let contactIndex = user.contacts.findIndex((fcountact)=>fcountact.fullName==contact.fullName),
+                newContactObject = {
                     fullName:contact.fullName,
                     emails:contact.emails,
                     avatar:contact.avatar,
@@ -59,7 +59,15 @@ export class ContactsService extends DataBaseService<ContactDocument>
                     jobTitle:contact.jobTitle,
                     organization:contact.organization,
                     company:contact.company
-                });
+                };
+                if( contactIndex >-1) {
+                    // console.log({_id:user.contacts[contactIndex]._id.toString()},newContactObject)
+                    let contactFound = await this.update({_id:user.contacts[contactIndex]._id.toString()},newContactObject,{session});
+                    console.log("Contact Found ",contactFound,user.contacts[contactIndex])
+                     user.contacts[contactIndex] = contactFound;                    
+                    return true
+                };
+                let newContactModel= this.createInstance(newContactObject);
                 user.contacts.push(newContactModel);
                 return newContactModel.save({session})
             }));
@@ -67,5 +75,4 @@ export class ContactsService extends DataBaseService<ContactDocument>
             return true;            
         })
     }
-    
 }

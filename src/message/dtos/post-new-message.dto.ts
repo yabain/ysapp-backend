@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate, IsDefined, IsEnum, IsMongoId, IsNotEmptyObject, IsObject, IsOptional } from "class-validator";
+import { IsArray, IsBoolean, IsDate, IsDefined, IsEnum, IsMongoId, IsNotEmptyObject, IsObject, IsOptional, IsString } from "class-validator";
 import { ObjectId } from "mongoose";
 import { Transform, Type } from "class-transformer";
 import { MessageType } from "../models";
@@ -23,25 +23,39 @@ export class PostNewMessageDTO
     type:MessageType;
 
     @IsOptional()
-    @IsMongoId({each:true})
-    contactsID:ObjectId[];
+    // @IsMongoId({each:true})
+    // @IsString({each:true})
+    contactsID: any; //ObjectId[] | string
 
     @IsOptional()
     @IsMongoId({each:true})
     groupsID:ObjectId[];
 
-    @IsBoolean()
+    @IsString()
     isSentToNow:boolean;
 
     @IsOptional()
     @Transform(({value})=> value && new Date(value))
     @IsDate()
     dateToSend:Date;
+    
+    @IsOptional()
+    @IsMongoId()
+    messageTemplateId:ObjectId;
 
-    @IsDefined()
-    @IsNotEmptyObject()
-    @Type(()=>MessageBodyDTO)
-    body:MessageBodyDTO ;
+    // @IsOptional()
+    // @IsDefined()
+    // @IsNotEmptyObject()
+    // @Type(()=>MessageBodyDTO)
+    // body:MessageBodyDTO ;
+
+    @IsOptional()
+    @IsString()
+    bodyText:string;
+
+    @IsOptional()
+    @IsString()
+    bodyFiles:Express.Multer.File[];
 
     email:string
 }

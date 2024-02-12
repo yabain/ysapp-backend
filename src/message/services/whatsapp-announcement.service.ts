@@ -46,5 +46,4 @@ export class WhatsappAnnouncementService {
     this.clientsWhatsApp.get(userFound._id.toString()).closeClient();
     this.clientsWhatsApp.delete(userFound._id.toString());
   }
-
 }

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpStatus, Injectable, MethodNotAllowedException, NotFoundException } from "@nestjs/common";
 import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import mongoose, { Model } from "mongoose";
 import { ContactsService } from "src/contact/services";
@@ -9,6 +9,8 @@ import { PostNewMessageDTO } from "../dtos";
 import { Message, MessageDocument } from "../models";
 import { CronJobTask } from "../utils";
 import { WhatsappAnnouncementService } from "./whatsapp-announcement.service";
+import { MessageTemplatesService } from "src/message-template/services";
+import { WhatsappClientServiceWS } from "./whatsapp-client-ws.service";
 
 @Injectable()
 export class MessageService extends DataBaseService<MessageDocument>
@@ -19,7 +21,8 @@ export class MessageService extends DataBaseService<MessageDocument>
         private whatsappAnnoucementService:WhatsappAnnouncementService,
         private userService:UsersService,
         private contactService:ContactsService,
-        private groupService:GroupService
+        private groupService:GroupService,
+        private messageTemplateService:MessageTemplatesService
         ){
         super(messageModel, connection);
 
@@ -33,8 +36,22 @@ export class MessageService extends DataBaseService<MessageDocument>
         message.type = postNewMessage.type;
         message.isSentToNow = postNewMessage.isSentToNow;
         // console.log("postNewMessage.body",postNewMessage.body)
-        if(postNewMessage.body.fileUrl) message.body.fileUrl =postNewMessage.body.fileUrl;
-        if(postNewMessage.body.text) message.body.text =postNewMessage.body.text;
+        
+        if(postNewMessage.messageTemplateId)
+        {
+            let messageTemplateService = await this.messageTemplateService.findOneByField({"_id":postNewMessage.messageTemplateId})
+            if(!messageTemplateService) throw new NotFoundException({
+                statusCode: 404,
+                error:"MessageTemplate/NotFound",
+                message:["Message Template not found"]
+            })
+            message.body.text=messageTemplateService.content
+        }
+        else 
+        {
+            if(postNewMessage.bodyFiles) message.body.file =postNewMessage.bodyFiles[0];
+            if(postNewMessage.bodyText) message.body.text =postNewMessage.bodyText;
+        }
 
         message.contacts = [];
         if(postNewMessage.contactsID)message.contacts = await Promise.all(postNewMessage.contactsID.map((contactId)=> this.contactService.findOneByField({"_id":contactId})));
@@ -43,11 +60,19 @@ export class MessageService extends DataBaseService<MessageDocument>
         if(postNewMessage.groupsID) message.groups = await Promise.all(postNewMessage.groupsID.map((groupId)=>this.groupService.findOneByField({"_id":groupId})));
         message.groups.forEach((group)=>message.contacts=[...message.contacts,...group.contacts])
         if(postNewMessage.dateToSend) message.dateToSend = postNewMessage.dateToSend;
-        // console.log("Message ",message)
-        if(message.isSentToNow) return this.whatsappAnnoucementService.sendMessage(message,user)
+
+        
+        let userWhatsappSync:WhatsappClientServiceWS = this.whatsappAnnoucementService.clientsWhatsApp.get(message.sender._id.toString());
+        if(!(await userWhatsappSync.isConnected())) throw new MethodNotAllowedException({
+            statusCode: HttpStatus.METHOD_NOT_ALLOWED,
+            error:"PostMessage/UserSender-NotFound",
+            message:["User send not found"]
+        })
+
+        if(message.isSentToNow) await userWhatsappSync.sendMessage(message,user)
         else {
             CronJobTask.newJobTask((params)=>{
-                this.whatsappAnnoucementService.sendMessage(params.message,params.sender);
+                userWhatsappSync.sendMessage(params.message,params.sender);
                 params.message.save()
             },{message,sender:user},message.dateToSend);
         }

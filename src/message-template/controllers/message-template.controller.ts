@@ -116,6 +116,7 @@ export class MessageTemplateController
         }        
     }
 
+
     /**
      * 
      * @api {put} /message-template/:id Mise a jour du message template
@@ -134,10 +135,8 @@ export class MessageTemplateController
      * @apiSuccess (200 Ok)  {String {2..}} data.description Description du template
      * @apiSuccess (200 Ok)  {String} data.content Contenu du template
      * 
-     * 
      * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
      * @apiUse apiError
-     * 
      */
     @Put(":id")
     async updateMessageTemplateById(@Req() request:Request, @Param("id",ObjectIDValidationPipe) id:string,@Body() updateMessageTemplateDTO:UpdateMessageTemplateDTO)

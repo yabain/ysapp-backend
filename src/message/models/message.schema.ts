@@ -49,9 +49,9 @@ export class Message extends Document
 
     @Prop({default:null,type:Date})
     dateToSend:Date;
-
+    
     @Prop({default:{},type:{text:String,fileUrl:String}})
-    body:{text:string,fileUrl:string} ;
+    body:{text:string,fileUrl?:string,file?:Express.Multer.File} ;
 
     @Prop({default:Date.now(),required:true})
     createdAt:Date

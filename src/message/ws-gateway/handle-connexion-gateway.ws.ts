@@ -41,18 +41,18 @@ export class HandleConnexionGatewayWS implements OnGatewayConnection, OnGatewayD
     {
         if(!this.mapClient.has(client.handshake.headers.origin)) this.mapClient.set(client.handshake.headers.origin,{email,connected:true});
         let newClient=await this.whatsAppAnnouncementService.getNewClientWhatsAppSession(email);
-        newClient.onReady(async ()=>client.emit("info",{contacts:await newClient.getContacts(),profil:await newClient.getProfil()}));
-
+        newClient.onReady(async ()=>{
+            client.emit('ready')
+            client.emit("info",{contacts:await newClient.getContacts(),profil:await newClient.getProfil()})
+        });
+        newClient.onLoadingData((value)=>client.emit("info-loading-percent",value));
         newClient.onAuthenticated(()=>client.emit("connected"));
         newClient.onDisconnected(()=>client.emit("disconnected"));
         newClient.onQrCode((qrCode)=>client.emit("qrcode",qrCode))
-        
-    }
-
+    }    
     @SubscribeMessage('disconnexion')
     async handleLogoutClientConnexion(@MessageBody('email') email:string, @ConnectedSocket() client:Socket)
     {
       await this.whatsAppAnnouncementService.logoutClient(email)
     }
-
 }

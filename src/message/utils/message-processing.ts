@@ -1,6 +1,10 @@
 import { Contact } from "src/contact/models";
 import { Message } from "../models";
 import { ContactExtractData } from "./contact-extract-data";
+import  * as TurndownService from "turndown"
+// var TurndownService = require('turndown')
+
+
 
 export class MessageProcessing
 {
@@ -35,6 +39,7 @@ export class MessageProcessing
 
     static getPersonalizedMessage(message:Message,contact:Contact,sender)
     {
+        console.log("Body Text ",message.body)
         let text = message.body.text;
         let varsValues = MessageProcessing.getVarListWithValues(message,contact,sender);
         let varsList = MessageProcessing.getVarList(text);
@@ -44,4 +49,11 @@ export class MessageProcessing
         })
         return MessageProcessing.replaceVar(text,values)
     }
+
+    static parseHTMLToWhatappFormat(bodyHtml)
+    {
+        let turndownService = new TurndownService();
+        return turndownService.turndown(bodyHtml);
+    }
+
 }

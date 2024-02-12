@@ -8,6 +8,7 @@ import { UserModule } from 'src/user/user.module';
 import { ContactModule } from 'src/contact/contact.module';
 import { GroupModule } from 'src/group';
 import { HandleConnexionGatewayWS, MessageGateWayWS } from './ws-gateway';
+import { MessageTemplateModule } from 'src/message-template/message-template.module';
 
 @Module({
   controllers: [
@@ -20,13 +21,15 @@ import { HandleConnexionGatewayWS, MessageGateWayWS } from './ws-gateway';
     GroupModule,
     MongooseModule.forFeature([
       {name:Message.name,schema:MessageSchema}
-  ]),
+    ]),
+    MessageTemplateModule
   ],
   providers: [
     
     MessageService,
     MessageGateWayWS,
     HandleConnexionGatewayWS,
+  
     // WhatsappAnnouncementService
   ],
   exports: [],

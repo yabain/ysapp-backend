@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common"
+import { Injectable, InternalServerErrorException } from "@nestjs/common"
 import mongoose, { ClientSession, Document, Model } from "mongoose";
 
 @Injectable()
@@ -49,6 +49,17 @@ export abstract class DataBaseService<T extends Document>
     async executeWithTransaction(functionToExecute:(session:ClientSession)=>any):Promise<any>
     {
         const transaction:ClientSession= await this.connection.startSession();   
-        return transaction.withTransaction(()=>functionToExecute(transaction))
+        // return transaction.withTransaction(()=>functionToExecute(transaction))
+        transaction.startTransaction();
+        try {
+            let result = await functionToExecute(transaction);
+            await transaction.commitTransaction();
+            return result;
+        } catch (error) {
+          await transaction.abortTransaction();
+        } finally {
+            transaction.endSession();
+        }
+        return false;
     }
 }

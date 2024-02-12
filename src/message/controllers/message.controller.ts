@@ -1,8 +1,10 @@
-import { Controller, Post, UseGuards, Body, HttpStatus, Req,Get } from "@nestjs/common";
+import { Controller, Post, UseGuards, Body, HttpStatus, Req,Get, UnprocessableEntityException, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { Request } from "express";
 import { PostNewMessageDTO } from "../dtos";
 import { MessageService, WhatsappAnnouncementService} from "../services";
 import { UsersService } from "src/user/services";
+import { FilesInterceptor } from "@nestjs/platform-express";
+import * as path from "path";
 
 @Controller("message")
 export class MessageController
@@ -12,9 +14,6 @@ export class MessageController
         private whatsAppAnnouncementService:WhatsappAnnouncementService,
         private usersService:UsersService
         ){}
-
-
-   
 
      /**
      * 
@@ -80,8 +79,27 @@ export class MessageController
      * 
      */
     @Post("post")
-    async postNewMessage(@Req() request:Request, @Body() postNewMessageDTO:PostNewMessageDTO,)
+    @UseInterceptors(FilesInterceptor('bodyFile',20,{
+        fileFilter:(req, file, callback) => {
+            console.log("File ",file.originalname)
+            let ext = path.extname(file.originalname);
+            if (!['.pdf','.png','.jpeg','.jpg','.doc','.docx','xls','.xlsx'].includes(ext.toLowerCase())) {
+              return callback(new UnprocessableEntityException({
+                statusCode:HttpStatus.UNPROCESSABLE_ENTITY,
+                error:"Unprocessable entity",
+                message:['Invalid file type']
+            }), false);
+            }
+          
+            return callback(null, true);
+          }
+    }))   
+    async postNewMessage(@UploadedFiles() files:Express.Multer.File[],@Req() request:Request, @Body() postNewMessageDTO:PostNewMessageDTO,)
     {
+        postNewMessageDTO.contactsID = postNewMessageDTO.contactsID.split(",")
+        if(files.length>0) postNewMessageDTO.bodyFiles=files
+        console.log("Post DTO ",postNewMessageDTO);
+
         return {
             statusCode:HttpStatus.OK,
             message:"Messsage send successfully",

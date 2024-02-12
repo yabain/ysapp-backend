@@ -10,6 +10,7 @@ export class GroupController
 {
     constructor(private groupsService:GroupService, private usersService:UsersService){}
 
+    
     /**
      * 
      * @api {get} /groups/ Obtention des groups de contacts

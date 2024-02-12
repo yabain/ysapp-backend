@@ -15,12 +15,11 @@ export class WhatsappClientServiceWS {
     private user:UserDocument=null
     ) {  
   }
-
   getWhatsAppSession()
   {
     this.clientWhatsApp = new Client({
       puppeteer: {
-        args: ['--no-sandbox','--disable-setuid-sandbox'],
+        args: ['--no-sandbox','--disable-setuid-sandbox'], //
         headless: true
       },
       authStrategy:new LocalAuth({
@@ -61,6 +60,7 @@ export class WhatsappClientServiceWS {
   onAuthenticated(handlerFunction:(user:Record<string,any>)=>void)
   {
     console.log("En attente de l'authentification")
+  
     //Bug: utilisé le mot 'on' pour gérer le cas d'une connexion, déconnexion et reconnexion
     this.clientWhatsApp.on('authenticated',async (session)=>{
       console.log("Auth")
@@ -75,40 +75,39 @@ export class WhatsappClientServiceWS {
     })
 
     this.clientWhatsApp.on('auth_failure', msg => {
+
       // Fired if session restore was unsuccessful
       console.error('AUTHENTICATION FAILURE', msg);
     })
+    
+  }
+  onLoadingData(handlerFunction:(user:Record<string,any>)=>void)
+  {
     this.clientWhatsApp.on('loading_screen', (percent, message) => {
-      console.log('LOADING SCREEN', percent, message);
+      return handlerFunction({percent});
     });
   }
-
   sendMessage(message:Message,sender):Promise<boolean>
   {
-    return new Promise<boolean>((resolve,reject)=>{
+    return new Promise<boolean>(async (resolve,reject)=>{
       let body={file:null,text:""}, params = null;
-      // console.log("send message ");
-      // this.clientWhatsApp.on('ready', ()=>{
-        // console.log("Ready")
         Promise.all(message.contacts.map(async (contact)=> {
-          body.text=  MessageProcessing.getPersonalizedMessage(message,contact,sender);
+          body.text= MessageProcessing.parseHTMLToWhatappFormat(MessageProcessing.getPersonalizedMessage(message,contact,sender));
           if(message.body.fileUrl) body.file = await MessageMedia.fromUrl(message.body.fileUrl);
-          // let contactUSer = await this.clientWhatsApp.getContactById(MessageProcessing.extractPhoneID(`${contact.phoneNumber}@c.us`))
-          let contactUSer = await this.clientWhatsApp.getNumberId(MessageProcessing.extractPhoneID(`${ContactExtractData.getWhatsappPhone(contact)}@c.us`))
+          else if(message.body.file) body.file = new MessageMedia(message.body.file.mimetype,message.body.file.buffer.toString("base64"),message.body.file.fieldname)
+          let contactUSer = `${ContactExtractData.getWhatsappPhone(contact).phoneNumber}@c.us`;  
           if(!body.file) return this.clientWhatsApp.sendMessage(contactUSer,body.text);
           return this.clientWhatsApp.sendMessage(contactUSer,body.file,{
             caption:body.text
           });
         }))
         .then((result)=>{
-          // console.log("Ok",result)
           resolve(true)
         })
         .catch((error)=>{
           console.log("Error ",error);
           reject(false)
         })
-      // })
     })  
   }
 
@@ -141,16 +140,13 @@ export class WhatsappClientServiceWS {
   {
     try
     {
-      this.clientWhatsApp.destroy();
+      if(await this.isConnected()) this.clientWhatsApp.destroy();
     }catch(error)
-    {
-      
-    }
+    {}
   }
 
   async isConnected()
   {
-
     console.log("State ",await this.clientWhatsApp.getState())
     return (await this.clientWhatsApp.getState()) == "CONNECTED"
   }

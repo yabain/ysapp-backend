@@ -396,7 +396,6 @@ export class ContactController
      * @apiUse apiError
      * 
      */
-
     @Post("sync-whatsapp")
     async syncContactFromWhatsapp(@Req() request:Request)
     {
