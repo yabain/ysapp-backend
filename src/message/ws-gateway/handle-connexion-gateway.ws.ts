@@ -10,49 +10,60 @@ import { WhatsappAnnouncementService } from '../services/whatsapp-announcement.s
   })
 export class HandleConnexionGatewayWS implements OnGatewayConnection, OnGatewayDisconnect
 {
-    mapClient:Map<string,{email:string,connected:boolean}>=new Map();//@ip=>{email,connected:true}
 
     constructor(
         private whatsAppAnnouncementService:WhatsappAnnouncementService,
     ){}
     
     handleConnection(client: Socket, ...args: any[]) {
-        if(this.mapClient.has(client.handshake.headers.origin)) {
-            let clientInfos= this.mapClient.get(client.handshake.headers.origin)
-            this.mapClient.set(client.handshake.headers.origin,{...clientInfos,connected:true})
-        }
+        console.log("New")
+        
         client.emit("connexion")
     }
 
     handleDisconnect(client: Socket) {
-        this.whatsAppAnnouncementService.removeClient(this.mapClient.get(client.handshake.headers.origin).email)
-        this.mapClient.delete(client.handshake.headers.origin);
-
-
-        // let clientInfos= this.mapClient.get(client.handshake.headers.origin)
-        // this.mapClient.set(client.handshake.headers.origin,{...clientInfos,connected:false})
-        // setTimeout(()=>{
-        //     if(!this.mapClient.get(client.handshake.headers.origin).connected) this.whatsAppAnnouncementService.removeClient(this.mapClient.get(client.handshake.headers.origin).email)
-        // },20000)
+        try{
+            if(client.data.email)  this.whatsAppAnnouncementService.removeClient(client.data.email)
+            console.log("Deconnexion")
+        }
+        catch(e)
+        {
+            console.log("Error Custom",e)
+        }
     }
 
     @SubscribeMessage('connexion')
     async handleNewClientConnexion(@MessageBody('email') email:string, @ConnectedSocket() client:Socket)
     {
-        if(!this.mapClient.has(client.handshake.headers.origin)) this.mapClient.set(client.handshake.headers.origin,{email,connected:true});
-        let newClient=await this.whatsAppAnnouncementService.getNewClientWhatsAppSession(email);
-        newClient.onReady(async ()=>{
-            client.emit('ready')
-            client.emit("info",{contacts:await newClient.getContacts(),profil:await newClient.getProfil()})
-        });
-        newClient.onLoadingData((value)=>client.emit("info-loading-percent",value));
-        newClient.onAuthenticated(()=>client.emit("connected"));
-        newClient.onDisconnected(()=>client.emit("disconnected"));
-        newClient.onQrCode((qrCode)=>client.emit("qrcode",qrCode))
+        try{
+            client.data={email};
+            console.log("New Client")
+            let newClient=await this.whatsAppAnnouncementService.getNewClientWhatsAppSession(email);
+            newClient.onReady(async ()=>{
+                client.emit('ready')
+                client.emit("info",{contacts:await newClient.getContacts(),profil:await newClient.getProfil()})
+            });
+            newClient.onLoadingData((value)=>client.emit("info-loading-percent",value));
+            newClient.onAuthenticated(()=>client.emit("sync-connected"));
+            newClient.onDisconnected(()=>client.emit("disconnected"));
+            newClient.onQrCode((qrCode)=> {            
+                console.log("Client ",client.handshake.time)
+                client.emit("qrcode",qrCode)
+            })
+        } catch(e)
+        {
+            console.log("Error Custom",e)
+        }
     }    
+
     @SubscribeMessage('disconnexion')
     async handleLogoutClientConnexion(@MessageBody('email') email:string, @ConnectedSocket() client:Socket)
     {
-      await this.whatsAppAnnouncementService.logoutClient(email)
+        try{
+            await this.whatsAppAnnouncementService.logoutClient(email)
+        }catch(e)
+        {
+            console.log("Error Custom",e)
+        }      
     }
 }

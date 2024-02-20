@@ -19,11 +19,11 @@ export class WhatsappAnnouncementService {
   {
     let userFound = await this.userService.findOneByField({email:userEmail});
     // console.log("userFound ",userFound.email,this.clientsWhatsApp.has(userFound._id.toString()))
-    if(this.clientsWhatsApp.has(userFound._id.toString())) this.removeClient(userEmail);
+    if(this.clientsWhatsApp.has(userEmail)) this.removeClient(userEmail);
 
     let newWhatsappClient = new WhatsappClientServiceWS(this.userService,userFound);
     await newWhatsappClient.getWhatsAppSession()
-    this.clientsWhatsApp.set(userFound._id.toString(),newWhatsappClient);
+    this.clientsWhatsApp.set(userEmail,newWhatsappClient);
     return newWhatsappClient;
   }
 
@@ -35,15 +35,21 @@ export class WhatsappAnnouncementService {
 
   async logoutClient(userEmail)
   {
-    let userFound = await this.userService.findOneByField({email:userEmail}), client = null;
-    if(this.clientsWhatsApp.has(userFound._id.toString())) client=this.clientsWhatsApp.get(userFound._id.toString());
-    if(client) client.disconnexion()
+    let client = null;
+    if(this.clientsWhatsApp.has(userEmail)) client=this.clientsWhatsApp.get(userEmail);
+    this.clientsWhatsApp.delete(userEmail)   
+    if(client) await client.disconnexion()     
+    
   }
 
   async removeClient(email)
-  {
-    let userFound = await this.userService.findOneByField({email:email});
-    this.clientsWhatsApp.get(userFound._id.toString()).closeClient();
-    this.clientsWhatsApp.delete(userFound._id.toString());
+  {   
+    if(this.clientsWhatsApp.has(email))
+    {
+      let client = this.clientsWhatsApp.get(email);
+      this.clientsWhatsApp.delete(email);
+      
+      client.closeClient();
+    }
   }
 }

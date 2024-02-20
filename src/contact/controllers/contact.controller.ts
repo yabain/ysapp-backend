@@ -401,13 +401,13 @@ export class ContactController
     {
         let user = await this.usersService.findOneByField({email:request["user"]["email"]});
         console.log("client ",this.whatsappAnnouncementService.clientsWhatsApp.size)
-        if(!this.whatsappAnnouncementService.clientsWhatsApp.has(user._id.toString())) throw new NotFoundException({
+        if(!this.whatsappAnnouncementService.clientsWhatsApp.has(user.email)) throw new NotFoundException({
             statusCode: 404,
             error:"UserSync/NotFound",
             message:["User sync not found"]
         })
 
-        let userWhatsappSync:WhatsappClientServiceWS = this.whatsappAnnouncementService.clientsWhatsApp.get(user._id.toString());
+        let userWhatsappSync:WhatsappClientServiceWS = this.whatsappAnnouncementService.clientsWhatsApp.get(user.email);
         if(!(await userWhatsappSync.isConnected())) throw new MethodNotAllowedException({
             statusCode: HttpStatus.METHOD_NOT_ALLOWED,
             error:"UserSync/NotFound",
@@ -415,7 +415,7 @@ export class ContactController
         })
 
         let userContactLists:any[] = await userWhatsappSync.getContacts();
-
+        console.log('Contact length ',userContactLists.length)
         await this.contactsService.createBulkContact(userContactLists.map((contact)=>{
             return {
                 fullName:contact.name,

@@ -4,6 +4,7 @@ export class CountryInfo
 {
     static getCountryByPhoneCode(phoneCode)
     {
-        return countryTelData.allCountries.find((country)=>country.dialCode==phoneCode);
+        let country = countryTelData.allCountries.find((country)=>country.dialCode==phoneCode)
+        return country
     }
 }

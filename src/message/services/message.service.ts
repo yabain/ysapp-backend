@@ -62,7 +62,7 @@ export class MessageService extends DataBaseService<MessageDocument>
         if(postNewMessage.dateToSend) message.dateToSend = postNewMessage.dateToSend;
 
         
-        let userWhatsappSync:WhatsappClientServiceWS = this.whatsappAnnoucementService.clientsWhatsApp.get(message.sender._id.toString());
+        let userWhatsappSync:WhatsappClientServiceWS = this.whatsappAnnoucementService.clientsWhatsApp.get(message.sender.email);
         if(!(await userWhatsappSync.isConnected())) throw new MethodNotAllowedException({
             statusCode: HttpStatus.METHOD_NOT_ALLOWED,
             error:"PostMessage/UserSender-NotFound",

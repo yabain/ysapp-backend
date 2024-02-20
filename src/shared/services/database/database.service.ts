@@ -1,23 +1,32 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common"
-import mongoose, { ClientSession, Document, Model } from "mongoose";
+import mongoose, { ClientSession,Connection, Document, Model } from "mongoose";
 
 @Injectable()
 export abstract class DataBaseService<T extends Document>
 {
     constructor(
         public entityModel:Model<T>,
-        public connection:mongoose.Connection
+        public connection:Connection
         ){}
 
     createInstance(createEntityDTO)
     {
-        return new this.entityModel(createEntityDTO);
+        return new this.entityModel(createEntityDTO);  
     }
     
     async create(createEntityDTO,session=null):Promise<T>
     {
         return new this.entityModel(createEntityDTO).save({session});
     }
+
+    async createMany(createEntityDTO:any[],session=null):Promise<any>
+    {
+        return this.entityModel.insertMany(createEntityDTO,{session});
+    }
+
+    
+
+
 
     async findAll(): Promise<T[]>
     {
@@ -46,20 +55,30 @@ export abstract class DataBaseService<T extends Document>
         await this.entityModel.findOneAndDelete(filter,{session});
     }
 
+    bulkOperator(ops:any[],session:ClientSession=null):Promise<any>
+    {
+        return this.entityModel.bulkWrite(ops,{session});
+    }
+
     async executeWithTransaction(functionToExecute:(session:ClientSession)=>any):Promise<any>
     {
-        const transaction:ClientSession= await this.connection.startSession();   
-        // return transaction.withTransaction(()=>functionToExecute(transaction))
+
+        const transaction:ClientSession= await this.connection.startSession();
         transaction.startTransaction();
-        try {
-            let result = await functionToExecute(transaction);
+        let result=null;
+        try {    
+            result= await functionToExecute(transaction);
             await transaction.commitTransaction();
-            return result;
-        } catch (error) {
-          await transaction.abortTransaction();
-        } finally {
-            transaction.endSession();
+        } 
+        catch(err)
+        {
+            await transaction.abortTransaction();
+            throw err
         }
-        return false;
+        finally
+        {
+            transaction.endSession();
+        }     
+        return  result;
     }
 }

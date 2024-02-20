@@ -19,16 +19,21 @@ export class WhatsappClientServiceWS {
   {
     this.clientWhatsApp = new Client({
       puppeteer: {
-        args: ['--no-sandbox','--disable-setuid-sandbox'], //
+        args: ['--no-sandbox','--disable-setuid-sandbox','--unhandled-rejections=strict'], //
         headless: true
       },
       authStrategy:new LocalAuth({
         clientId:this.user._id.toString()
-      })
-    });
+      }),
+      webVersionCache: {
+        type: 'remote',
+        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2326.8.html',
+        }
+    });    
     this.clientWhatsApp.initialize();
     return this.clientWhatsApp;
   }
+
 
   onReady(handlerFunction:(bool:boolean)=>void)
   {
@@ -60,30 +65,26 @@ export class WhatsappClientServiceWS {
   onAuthenticated(handlerFunction:(user:Record<string,any>)=>void)
   {
     console.log("En attente de l'authentification")
-  
-    //Bug: utilisé le mot 'on' pour gérer le cas d'une connexion, déconnexion et reconnexion
+      //Bug: utilisé le mot 'on' pour gérer le cas d'une connexion, déconnexion et reconnexion
     this.clientWhatsApp.on('authenticated',async (session)=>{
-      console.log("Auth")
+      console.log("Auth")      
 
       if(!this.user.hasSyncWhatsApp)
       {
         this.user.hasSyncWhatsApp=true;
         await this.user.save()
-      }
-        
+      }        
         return handlerFunction(this.user);
-    })
-
+    })  
     this.clientWhatsApp.on('auth_failure', msg => {
-
       // Fired if session restore was unsuccessful
       console.error('AUTHENTICATION FAILURE', msg);
-    })
-    
-  }
+    })    
+  }  
   onLoadingData(handlerFunction:(user:Record<string,any>)=>void)
   {
     this.clientWhatsApp.on('loading_screen', (percent, message) => {
+      console.log("Percent ",percent)
       return handlerFunction({percent});
     });
   }
@@ -115,14 +116,21 @@ export class WhatsappClientServiceWS {
   {
     return new Promise(async (resolve,reject)=>{
       let contacts = await this.clientWhatsApp.getContacts();
-      contacts = contacts.filter((contact:Contact)=> !contact.isBlocked && !contact.isGroup && !contact.isMe && contact.isMyContact && contact.isWAContact && contact.isUser);
-      await Promise.all(contacts.map((contact)=>{
-        return new Promise(async (res,rej)=>{
-          contact.avatar = await contact.getProfilePicUrl()
-          contact.countryCode = CountryInfo.getCountryByPhoneCode(await contact.getCountryCode()).iso2
-          res(true);
+      contacts = contacts.filter((contact:Contact)=> contact.id.server=='c.us' && !contact.isBlocked && !contact.isGroup && !contact.isMe && contact.isMyContact && contact.isWAContact && contact.isUser);
+
+      let foundContacts = [];
+      await Promise.all(contacts.map(async (cont)=>{
+        return new Promise(async (resolve,reject)=>{
+          let countryInfo =CountryInfo.getCountryByPhoneCode(await cont.getCountryCode());
+          if(countryInfo) {          
+            cont.avatar = await cont.getProfilePicUrl()
+            cont.countryCode = countryInfo.iso2
+            foundContacts.push(cont)
+          }
+          resolve(true)
         })
-      }));
+      }))
+
       resolve(contacts)
     })    
   }
@@ -131,8 +139,9 @@ export class WhatsappClientServiceWS {
   {
     return this.clientWhatsApp.info
   }
-  disconnexion()
+  async disconnexion()
   {
+
     return this.clientWhatsApp.logout()
   }
 
@@ -140,9 +149,11 @@ export class WhatsappClientServiceWS {
   {
     try
     {
-      if(await this.isConnected()) this.clientWhatsApp.destroy();
-    }catch(error)
-    {}
+      await this.clientWhatsApp.destroy()
+      
+    }
+    catch(e){}
+    return true
   }
 
   async isConnected()
