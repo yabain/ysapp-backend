@@ -9,6 +9,7 @@ import { ContactModule } from 'src/contact/contact.module';
 import { GroupModule } from 'src/group';
 import { HandleConnexionGatewayWS, MessageGateWayWS } from './ws-gateway';
 import { MessageTemplateModule } from 'src/message-template/message-template.module';
+import { PlanificationModule } from 'src/planification/planification.module';
 
 @Module({
   controllers: [
@@ -22,7 +23,8 @@ import { MessageTemplateModule } from 'src/message-template/message-template.mod
     MongooseModule.forFeature([
       {name:Message.name,schema:MessageSchema}
     ]),
-    MessageTemplateModule
+    MessageTemplateModule,
+    PlanificationModule
   ],
   providers: [
     

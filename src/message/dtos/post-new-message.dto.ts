@@ -1,8 +1,9 @@
-import { IsArray, IsBoolean, IsDate, IsDefined, IsEnum, IsMongoId, IsNotEmptyObject, IsObject, IsOptional, IsString } from "class-validator";
+import { ArrayMinSize, IsArray, IsBoolean, IsDate, IsDefined, IsEnum, IsMongoId, IsNotEmptyObject, IsObject, IsOptional, IsString, ValidateNested } from "class-validator";
 import { ObjectId } from "mongoose";
 import { Transform, Type } from "class-transformer";
 import { MessageType } from "../models";
 import { MessageBodyDTO } from "./message-body.dto";
+import { CreatePlanificationDTO } from "src/planification/dtos";
 
 /**
  * @apiDefine PostNewMessageDTO Post d'un nouveau message
@@ -58,4 +59,11 @@ export class PostNewMessageDTO
     bodyFiles:Express.Multer.File[];
 
     email:string
+
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({each:true})
+    @ArrayMinSize(1)
+    @Type(()=>CreatePlanificationDTO)
+    planification:CreatePlanificationDTO[];
 }

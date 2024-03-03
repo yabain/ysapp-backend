@@ -39,7 +39,6 @@ export class MessageProcessing
 
     static getPersonalizedMessage(message:Message,contact:Contact,sender)
     {
-        console.log("Body Text ",message.body)
         let text = message.body.text;
         let varsValues = MessageProcessing.getVarListWithValues(message,contact,sender);
         let varsList = MessageProcessing.getVarList(text);

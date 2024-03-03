@@ -5,6 +5,7 @@ import configuration from "./config/configuration";
 import { SecurityModule } from "./security/security.module";
 import { AuthGuard, KeycloakConnectModule, ResourceGuard, RoleGuard } from "nest-keycloak-connect";
 import { APP_GUARD } from "@nestjs/core";
+import { ScheduleModule } from "@nestjs/schedule";
 
 
 @Module({
@@ -31,10 +32,10 @@ import { APP_GUARD } from "@nestjs/core";
               secret: configService.get("KEYCLOAK_SERVER_SECRET"),   
               bearerOnly:true
             })
-        })
+        }),
+        ScheduleModule.forRoot()
     ],    
     providers: [
-
       
     ],
     exports:[
@@ -42,7 +43,6 @@ import { APP_GUARD } from "@nestjs/core";
       ConfigModule,
       MongooseModule,
       KeycloakConnectModule,
-
   ],
 })
 export class SharedModule{}

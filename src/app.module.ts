@@ -11,6 +11,7 @@ import { ResourceGuard, RoleGuard } from 'nest-keycloak-connect';
 import { UserAuthGuard } from './user/guards';
 import { MessageModule } from './message/message.module';
 import { MessageTemplateModule } from './message-template/message-template.module';
+import { PlanificationModule } from './planification/planification.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { MessageTemplateModule } from './message-template/message-template.modul
     ContactModule,
     MessageModule,
     GroupModule,
-    MessageTemplateModule
+    MessageTemplateModule,
+    PlanificationModule
   ],
   controllers: [
     AppController
