@@ -33,7 +33,6 @@ import { ScheduleModule } from "@nestjs/schedule";
               bearerOnly:true
             })
         }),
-        ScheduleModule.forRoot()
     ],    
     providers: [
       
@@ -43,6 +42,7 @@ import { ScheduleModule } from "@nestjs/schedule";
       ConfigModule,
       MongooseModule,
       KeycloakConnectModule,
+      // ScheduleModule
   ],
 })
 export class SharedModule{}

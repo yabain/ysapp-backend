@@ -12,6 +12,7 @@ import { UserAuthGuard } from './user/guards';
 import { MessageModule } from './message/message.module';
 import { MessageTemplateModule } from './message-template/message-template.module';
 import { PlanificationModule } from './planification/planification.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -21,7 +22,9 @@ import { PlanificationModule } from './planification/planification.module';
     MessageModule,
     GroupModule,
     MessageTemplateModule,
-    PlanificationModule
+    PlanificationModule,
+    ScheduleModule.forRoot()
+
   ],
   controllers: [
     AppController

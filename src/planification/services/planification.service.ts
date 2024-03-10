@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, OnApplicationBootstrap } from "@nestjs/common";
 import { InjectModel, InjectConnection } from "@nestjs/mongoose";
 import mongoose, { Model } from "mongoose";
 import { DataBaseService } from "src/shared/services/database";
@@ -9,26 +9,42 @@ import { CRON_JOB_RECCURENT_TYPE, CRON_JOB_TYPE } from "../enums";
 import { DateUtil, SendMessageInDynamicJobUtil } from "../utils";
 import { CronJobTaskService } from "./cron-job-task.service";
 import { Cron } from "@nestjs/schedule";
-import { WhatsappAnnouncementService } from "src/message/services";
+import { ModuleRef } from "@nestjs/core";
 
 
 @Injectable()
-export class PlanificationService extends DataBaseService<PlanificationDocument>
+export class PlanificationService extends DataBaseService<PlanificationDocument> implements OnApplicationBootstrap
 {
     constructor(
         @InjectModel(Planification.name)  planificationModel: Model<PlanificationDocument>,
         @InjectConnection() connection: mongoose.Connection,
         private cronJobTaskService:CronJobTaskService,
-        private whatsAppAnnoucementService:WhatsappAnnouncementService
+        private moduleRef:ModuleRef
     ){
-        super(planificationModel, connection);
+        super(planificationModel, connection,["message"]);
+    }
+
+    //Planification au démarrage de l'application
+    async onApplicationBootstrap():Promise<any> {
+        //TODO
+        // await this.planifMonth()
+    }
+
+
+    //Planification des messages du mois
+    @Cron('0 0 1 */1 *')
+    async planifMonth()
+    {
+        let allPlanification = await this.findByField({isActive:true,"owner.hasSyncWhatsApp":true});
+        allPlanification.map((plan)=>{
+            SendMessageInDynamicJobUtil.createJobToSendMessage(this.moduleRef,plan)
+        })
     }
 
     
-    
-    newPlanification(createPlanificationDTO:CreatePlanificationDTO[],message:Message)
+    newPlanification(createPlanificationDTO:CreatePlanificationDTO[],message:Message,title:string)
     {
-        return this.create({owner:message.sender,message,planning:createPlanificationDTO})
+        return this.create({owner:message.sender,message,planning:createPlanificationDTO,title})
     }
 
     async updatePlanfication(updatePlanficationDTO:UpdateStatePlanificationDTO)
@@ -44,12 +60,13 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
         {
             if(!this.cronJobTaskService.jobExist(this.cronJobTaskService.generateNewJobName(planification.owner)))
             {
-                SendMessageInDynamicJobUtil.createJobToSendMessage(this,planification,this.whatsAppAnnoucementService,this.cronJobTaskService)
+                // SendMessageInDynamicJobUtil.createJobToSendMessage(this,planification,this.whatsAppAnnoucementService,this.cronJobTaskService)
+                SendMessageInDynamicJobUtil.createJobToSendMessage(this.moduleRef,planification)
             }
-            else this.cronJobTaskService.removeJobTask(this.cronJobTaskService.generateNewJobName(planification.owner))
+            else planification.planning.forEach((plan)=>this.cronJobTaskService.removeJobTask(plan.subJobId)) 
         }
         return planification.save();
-    }
+    }    
 
     async removePlanification(planificationID:string)
     {
@@ -59,7 +76,9 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
             error:"Planification/NotFound",
             message:["Planification not found"]
         })
-        this.cronJobTaskService.removeJobTask(this.cronJobTaskService.generateNewJobName(planification.owner))
+        planification.planning.forEach((plan)=>{
+            this.cronJobTaskService.removeJobTask(plan.subJobId)
+        })
         return this.executeWithTransaction(async (session)=>{
             await planification.message.delete({session})
             await this.delete({_id:planificationID},{session});
@@ -67,39 +86,44 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
         })
     }
 
-    applyOnCronJob(planificationModel:PlanificationDocument,functionCallback:(params:void)=>void,jobName:string,params=null)
+    applyOnCronJob(planificationModel:PlanificationDocument,functionCallback:(params:void)=>void,params=null)
     {
         this.transformPlanificationToCronJobArray(planificationModel.planning)
-        .filter((plan)=>plan!=null)
+        .filter((plan)=>plan.plan!=null)
         .map((plan)=>{
-            this.cronJobTaskService.newJobTask(functionCallback,params,plan,jobName)
+            this.cronJobTaskService.newJobTask(functionCallback,params,plan.plan,plan.planObj.subJobId)
         })
     }
 
-    transformPlanificationToCronJobArray(planning:PlanificationType[])
+    transformPlanificationToCronJobArray(planning:PlanificationType[]):{planObj:PlanificationType,plan:string}[]
     {
         return planning.map((plan)=>{
-            if(plan.type==CRON_JOB_TYPE.IS_ALL_DAY) return this.transformAllDatePlanificationToCronJobString(plan)
-            if(plan.type==CRON_JOB_TYPE.IS_RECCURENT) return this.transformReccurentPlanificationToCronJobString(plan)
-            if(plan.type==CRON_JOB_TYPE.IS_RANDOM) return this.transformReccurentPlanificationToCronJobString(plan)
+            let planString=null;
+            if(plan.type==CRON_JOB_TYPE.IS_ALL_DAY) planString=this.transformAllDatePlanificationToCronJobString(plan)
+            if(plan.type==CRON_JOB_TYPE.IS_RECCURENT) planString=this.transformReccurentPlanificationToCronJobString(plan)
+            if(plan.type==CRON_JOB_TYPE.IS_RANDOM) planString=this.transformRandomPlanificationToCronJobString(plan)
+            return {planObj:plan,plan:planString}
         })
     }
 
     transformAllDatePlanificationToCronJobString(planning:PlanificationType)
     {
         let cronString = this.transformTimeToCronJobString(planning.time);
-        let dateNow = new Date(), lastDayOfStartDateMonth = new Date(planning.startDate.getFullYear(),planning.startDate.getMonth()+1,0),
-        firstDayOfEndDateMonth = new Date(planning.endDate.getFullYear(),planning.endDate.getMonth(),1),
-        lastDayOfEndDateMonth = new Date(planning.endDate.getFullYear(),planning.endDate.getMonth(),1);
+        let dateNow = new Date(), 
+        startDate = new Date(planning.startDate),
+        endDate = new Date(planning.endDate),
+        lastDayOfStartDateMonth = new Date(startDate.getFullYear(),startDate.getMonth()+1,0),
+        firstDayOfEndDateMonth = new Date(endDate.getFullYear(),endDate.getMonth(),1),
+        lastDayOfEndDateMonth = new Date(endDate.getFullYear(),endDate.getMonth(),1);
 
-        if(planning.startDate.getMonth()==planning.endDate.getMonth() && planning.startDate.getFullYear()==planning.endDate.getFullYear())
+        if(startDate.getMonth()==endDate.getMonth() && startDate.getFullYear()==endDate.getFullYear())
         {
-            if(planning.startDate.getMonth()==dateNow.getMonth()) cronString+=` ${planning.startDate.getDate()-planning.endDate.getDate()} ${planning.startDate.getMonth()+1} *`
+            if(startDate.getMonth()==dateNow.getMonth()) cronString+=` ${startDate.getDate()-endDate.getDate()} ${startDate.getMonth()} *`
             return null;
         }
-        else if(dateNow>=planning.startDate && dateNow<=lastDayOfStartDateMonth) cronString+=` ${planning.startDate.getDate()}-${lastDayOfStartDateMonth.getDate()} ${planning.startDate.getMonth()+1} *`
-        else if(dateNow>=firstDayOfEndDateMonth && dateNow<=lastDayOfEndDateMonth && planning.endDate<=lastDayOfEndDateMonth) cronString += `  ${firstDayOfEndDateMonth.getDate()}-${planning.endDate.getDate()} ${planning.startDate.getMonth()+1} *`
-        else cronString+=` * ${firstDayOfEndDateMonth.getMonth()+1} *`;
+        else if(dateNow>=startDate && dateNow<=lastDayOfStartDateMonth) cronString+=` ${startDate.getDate()}-${lastDayOfStartDateMonth.getDate()} ${startDate.getMonth()} *`
+        else if(dateNow>=firstDayOfEndDateMonth && dateNow<=lastDayOfEndDateMonth && endDate<=lastDayOfEndDateMonth) cronString += `  ${firstDayOfEndDateMonth.getDate()}-${endDate.getDate()} ${startDate.getMonth()} *`
+        else cronString+=` * ${firstDayOfEndDateMonth.getMonth()} *`;
         return cronString;
     }
 
@@ -109,7 +133,7 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
         let cronString = this.transformTimeToCronJobString(planning.time);
         switch (planning.recurency) {
             case CRON_JOB_RECCURENT_TYPE.DAY:
-                cronString+=` */${planning.every} ${new Date().getMonth()+1} *`
+                cronString+=` */${planning.every} ${new Date().getMonth()} *`
                 break;
             case CRON_JOB_RECCURENT_TYPE.WEEK:
                 let newCurrentDateWeek=new Date();
@@ -120,16 +144,16 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
                 {
                     newCurrentDateWeek.setDate(newCurrentDateWeek.getDate()+7*planning.every);
                     if(newCurrentDateWeek.getMonth()+1<=(new Date().getMonth()+1)) datesString+= `,${newCurrentDateWeek.getDate()}`;
-                }
-                
-                cronString+=` ${datesString} ${newCurrentDateWeek.getMonth()+1}`
+                }                
+                cronString+=` ${datesString} ${newCurrentDateWeek.getMonth()} *`
+
                 break;
             case CRON_JOB_RECCURENT_TYPE.MONTH:
                 let begingMonthDate = new Date(planning.date), newCurrentDateMonth = new Date();
                 
                 if(newCurrentDateMonth.getFullYear()==begingMonthDate.getFullYear() && newCurrentDateMonth.getMonth()==begingMonthDate.getMonth())
                 {
-                    cronString+=` ${begingMonthDate.getDate()} ${begingMonthDate.getMonth()+1} *`
+                    cronString+=` ${begingMonthDate.getDate()} ${begingMonthDate.getMonth()} *`
                 }
                 else return null;
                 break;
@@ -139,7 +163,7 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
                 
                 if((newCurrentDateYear.getFullYear()-begingYearDate.getFullYear()%planning.every==0) && newCurrentDateYear.getMonth()==begingYearDate.getMonth())
                 {
-                    cronString+=` ${begingYearDate.getDate()} ${begingYearDate.getMonth()+1} *`
+                    cronString+=` ${begingYearDate.getDate()} ${begingYearDate.getMonth()} *`
                 }
                 else return null;
                 break;
@@ -152,25 +176,23 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
         let dayString="";
         let newDate = new Date();
         planning.dates.forEach((date)=>{
-            if(newDate.getMonth()==date.getMonth()) dayString+=`${date.getDate()},`
+            let oldDate = new Date(date);
+            console.log(newDate,oldDate)
+            if(newDate.getMonth()==oldDate.getMonth()) dayString+=`${oldDate.getDate()},`
         });
         if(dayString.length>0) {
-            return `${this.transformTimeToCronJobString(planning.time)}  ${dayString.slice(0,dayString.lastIndexOf(","))} ${newDate.getMonth()+1} *`
+            return `${this.transformTimeToCronJobString(planning.time)} ${dayString.slice(0,dayString.lastIndexOf(","))} ${newDate.getMonth()} *`
+            // return `${this.transformTimeToCronJobString(planning.time)} ${dayString.slice(0,dayString.lastIndexOf(","))} ${newDate.getMonth()+1} *`
         }
         return null;
     }
 
-    transformTimeToCronJobString(timeDef)
+    transformTimeToCronJobString(timeDef:string)
     {
-        let [time,timeZone] = timeDef.splite(" ");
-        let [heure,minute] = time.splite(":");
-        heure = parseInt(heure);
-        minute = parseInt(minute);
-        if(timeZone=="PM") 
-        {
-            heure+=12;
-            minute+=12;
-        }
-        return `${minute} ${heure}`
+        let [time,timeZone] = timeDef.split(" ");
+        let [heure,minute] = time.split(":");
+
+        if(timeZone=="PM") return `0 ${parseInt(minute)} ${parseInt(heure)+12}`
+        return `0 ${parseInt(minute)} ${parseInt(heure)}`
     }
 }

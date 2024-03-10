@@ -10,11 +10,11 @@ import { WhatsappAnnouncementService } from "src/message/services";
 @Module({
     controllers:[ContactController],
     imports:[
-        MongooseModule.forFeature([
-        {name:Contact.name,schema:ContactSchema},
-        // {name:ContactEmail.name,schema:ContactEmailSchema},
-        // {name:PhoneNumber.name,schema:PhoneNumberSchema},
-    ]),
+            MongooseModule.forFeature([
+            {name:Contact.name,schema:ContactSchema},
+            // {name:ContactEmail.name,schema:ContactEmailSchema},
+            // {name:PhoneNumber.name,schema:PhoneNumberSchema},
+        ]),
         UserModule,
         GroupModule
     ],
@@ -22,6 +22,9 @@ import { WhatsappAnnouncementService } from "src/message/services";
         ContactsService,
         WhatsappAnnouncementService
     ],
-    exports:[ContactsService,WhatsappAnnouncementService]
+    exports:[
+        ContactsService,
+        WhatsappAnnouncementService
+    ]
 })
 export class ContactModule{}

@@ -5,6 +5,8 @@ import { MessageService, WhatsappAnnouncementService} from "../services";
 import { UsersService } from "src/user/services";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import * as path from "path";
+import { plainToClass } from "class-transformer";
+import { CreatePlanificationDTO } from "src/planification/dtos";
 
 @Controller("message")
 export class MessageController
@@ -97,8 +99,9 @@ export class MessageController
     async postNewMessage(@UploadedFiles() files:Express.Multer.File[],@Req() request:Request, @Body() postNewMessageDTO:PostNewMessageDTO,)
     {
         postNewMessageDTO.contactsID = postNewMessageDTO.contactsID.split(",")
+        // postNewMessageDTO.planification = postNewMessageDTO.planification.map((plan)=> plainToClass(CreatePlanificationDTO,plan)) 
         if(files.length>0) postNewMessageDTO.bodyFiles=files
-        console.log("Post DTO ",postNewMessageDTO);
+        // console.log("Post DTO ",postNewMessageDTO,postNewMessageDTO.planification);
 
         return {
             statusCode:HttpStatus.OK,

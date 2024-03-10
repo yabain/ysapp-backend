@@ -14,56 +14,46 @@ import { PlanificationService } from "src/planification/services";
 import { Cron } from "@nestjs/schedule";
 import { CronJobTaskService } from "src/planification/services/cron-job-task.service";
 import { SendMessageInDynamicJobUtil } from "src/planification/utils";
+import { ModuleRef } from "@nestjs/core";
 
 @Injectable()
 export class MessageService extends DataBaseService<MessageDocument>
 {
     constructor(
-        @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
+        @InjectModel(Message.name) messageModel: Model<MessageDocument>,
         @InjectConnection() connection: mongoose.Connection,
         private whatsappAnnoucementService:WhatsappAnnouncementService,
         private userService:UsersService,
         private contactService:ContactsService,
         private groupService:GroupService,
         private planificationService:PlanificationService,
-        private messageTemplateService:MessageTemplatesService,
-        private cronJobTaskService:CronJobTaskService
-        ){
+        private messageTemplateService:MessageTemplatesService        ){
         super(messageModel, connection);
 
         }
-    
-    //Planification des messages du mois
-    @Cron('0 0 1 */1 *')
-    async planifMonth()
-    {
-        let allPlanification = await this.planificationService.findByField({isActive:true,"owner.hasSyncWhatsApp":true});
-        allPlanification.map((plan)=>{
-            SendMessageInDynamicJobUtil.createJobToSendMessage(this.planificationService,plan,this.whatsappAnnoucementService,this.cronJobTaskService)
-        })
-    }
         
     async postNewMessage(postNewMessage:PostNewMessageDTO,user)
     {
         let message = await this.getMessageToSend(postNewMessage,await this.userService.findOneByField({"email":user.email}))
 
         let userWhatsappSync:WhatsappClientServiceWS = this.whatsappAnnoucementService.clientsWhatsApp.get(message.sender.email);
-        if(!(await userWhatsappSync.isConnected())) throw new MethodNotAllowedException({
-            statusCode: HttpStatus.METHOD_NOT_ALLOWED,
-            error:"PostMessage/UserSender-NotFound",
-            message:["User send not found"]
-        })
-
-        if(message.isSentToNow) await userWhatsappSync.sendMessage(message,user)
+        
+        // console.log("UserWhatsappSync ",userWhatsappSync)
+        if(message.isSentToNow) {
+            if(!(await userWhatsappSync.isConnected())) throw new MethodNotAllowedException({
+                statusCode: HttpStatus.METHOD_NOT_ALLOWED,
+                error:"PostMessage/UserSender-NotFound",
+                message:["User send not found"]
+            })
+            await userWhatsappSync.sendMessage(message,user)
+        }
         else {
             await message.save();
-
             this.planificationService.applyOnCronJob(
-                await this.planificationService.newPlanification(postNewMessage.planification,message),
+                await this.planificationService.newPlanification(postNewMessage.planification,message,postNewMessage.title),
                 ()=>{
                     userWhatsappSync.sendMessage(message,user);
-                },
-                this.cronJobTaskService.generateNewJobName(user)
+                }
             );
         }
         return message;

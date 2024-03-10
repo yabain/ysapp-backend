@@ -6,7 +6,9 @@ export abstract class DataBaseService<T extends Document>
 {
     constructor(
         public entityModel:Model<T>,
-        public connection:Connection
+        public connection:Connection,
+        public toPopuloate:string[]=[]
+
         ){}
 
     createInstance(createEntityDTO)
@@ -24,24 +26,27 @@ export abstract class DataBaseService<T extends Document>
         return this.entityModel.insertMany(createEntityDTO,{session});
     }
 
-    
-
-
+    async findByPage(select:Record<string,any>={},page=1,limit=10)
+    {
+        return this.entityModel.find(select).sort({createdAt:1}).limit(limit).skip(page*limit).populate(this.toPopuloate).exec()
+    }
 
     async findAll(): Promise<T[]>
     {
-        return this.entityModel.find<T>().sort({createdAt:1}).exec();
+        return this.entityModel.find<T>().sort({createdAt:1}).populate(this.toPopuloate).exec();
     }
 
  
     async findByField(entityObj:Record<string,any>):Promise<T[]>
     {
-        return this.entityModel.find<T>({where:entityObj}).sort({createdAt:1}).exec();
+        return this.entityModel.find<T>({where:entityObj}).sort({createdAt:1}).populate(this.toPopuloate).exec();
     }
 
-    async findOneByField(entityObj:Record<string,any>):Promise<T>
+    async findOneByField(entityObj:Record<string,any>,select:Record<string,any>={}):Promise<T>
     {
-        return this.entityModel.findOne<T>(entityObj).exec();
+        // return this.entityModel.findOne<T>(entityObj).exec();
+        return this.entityModel.findOne<T>({...entityObj,isDeleted:false}).select(select).exec().then((result)=>result?result.populate(this.toPopuloate):null);
+
     }
 
   

@@ -149,7 +149,7 @@ export class WhatsappClientServiceWS {
   {
     try
     {
-      await this.clientWhatsApp.destroy()
+      // await this.clientWhatsApp.destroy()
       
     }
     catch(e){}

@@ -16,6 +16,7 @@ export type PlanificationType = {
   dayOfWeek?:number,
   monthOfYear?:number,
   date?:Date,
+  subJobId:string,
   dates?:Date[]
 }
 
@@ -40,26 +41,34 @@ export class Planification extends Document{
     message:Message;
 
     @Prop({default:""})
-    jobName:string;
+    title:string;
     
-    @Prop(raw([
-        {
-            type:String,
-            time:{default:"",type:String},
-            startDate:{type:Date,default:new Date()},
-            endDate:{type:Date,default:new Date()},
-            every:{type:Number,default:0},
-            recurency:{default:CRON_JOB_RECCURENT_TYPE.MONTH,enum:CRON_JOB_RECCURENT_TYPE},
-            dayOfWeek:{type:Number,default:0},
-            monthOfYear:{type:Number,default:0},
-            date:{type:Date,default:new Date()},
-            dates:{type:Array,default:[]},
+    @Prop({
+      type:
+      [{
+        type:Object,
+        default:{
+          type:"",
+          time:"",
+          startDate:new Date(),
+          endDate:new Date(),
+          every:0,
+          recurency:CRON_JOB_RECCURENT_TYPE.MONTH,
+          dayOfWeek:0,
+          monthOfYear:0,
+          date:new Date(),
+          subJobId:"",
+          dates:[]
         }
-    ]))
+      }]
+    })
     planning:PlanificationType[]
 
+  
     @Prop({default:true})
     isActive:Boolean;
-
+    
+    @Prop({default:Date.now(),required:true})
+    createdAt:Date;
 }
 export const PlanificationSchema = SchemaFactory.createForClass(Planification)

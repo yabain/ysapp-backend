@@ -54,7 +54,10 @@ export class Message extends Document
     body:{text:string,fileUrl?:string,file?:Express.Multer.File} ;
 
     @Prop({default:Date.now(),required:true})
-    createdAt:Date
+    createdAt:Date;
+    
+    @Prop({default:""})
+    title:string
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message)

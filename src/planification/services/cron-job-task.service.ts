@@ -1,17 +1,22 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { Cron,SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from "cron";
 import { User } from "src/user/models";
-
 @Injectable()
 export class CronJobTaskService
 {
 
-    constructor(private schedulerRegistry: SchedulerRegistry){}
-        
+    constructor(private schedulerRegistry: SchedulerRegistry,
+        ){}
+
     newJobTask(task:(params)=>void,params,plan:string,planName:string)
     {
-        let job = new CronJob(plan, ()=>task(params));
+        // console.log("Task Scheduler start",plan,planName,params,task)
+        let job = new CronJob(plan, ()=>{
+            console.log("Task Scheduled")
+            task(params);
+        });
+        // console.log("Job ",job)
         this.schedulerRegistry.addCronJob(planName,job);
         job.start();        
     }
@@ -25,7 +30,7 @@ export class CronJobTaskService
 
     generateNewJobName(userSender:User)
     {
-        return `sending_message_to_${userSender.email}_${new Date().toISOString()}`
+        return `sending_message_to_${userSender.email}_${new Date().getTime()}${Math.floor(Math.random()*10000)}`
     }
 
     jobExist(jobName)

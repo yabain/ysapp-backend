@@ -2,13 +2,17 @@ import { WhatsappAnnouncementService, WhatsappClientServiceWS } from "src/messag
 import { PlanificationDocument } from "../models";
 import { PlanificationService } from "../services";
 import { CronJobTaskService } from "../services/cron-job-task.service";
+import { ModuleRef } from "@nestjs/core";
 
 export class SendMessageInDynamicJobUtil
 {
-    static createJobToSendMessage(planificationService:PlanificationService,
-        planificationObject:PlanificationDocument,whatsappAnnoucementService:WhatsappAnnouncementService,
-        cronJobTaskService:CronJobTaskService)
+    static createJobToSendMessage(moduleRef:ModuleRef, planificationObject:PlanificationDocument)
     {
+        
+        let planificationService:PlanificationService = moduleRef.get(PlanificationService)
+        ,whatsappAnnoucementService:WhatsappAnnouncementService = moduleRef.get(WhatsappAnnouncementService),
+        cronJobTaskService:CronJobTaskService=moduleRef.get(CronJobTaskService)
+
         planificationService.applyOnCronJob(planificationObject,async ()=>{
         let message = planificationObject.message;
         let userWhatsappSync:WhatsappClientServiceWS = whatsappAnnoucementService.clientsWhatsApp.get(message.sender.email);

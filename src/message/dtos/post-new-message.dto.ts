@@ -60,10 +60,15 @@ export class PostNewMessageDTO
 
     email:string
 
-    @IsOptional()
-    @IsArray()
-    @ValidateNested({each:true})
-    @ArrayMinSize(1)
+    @IsString()
+    title:string;
+
+    @IsOptional()    
+    @Transform(({value})=> JSON.parse(value))
+    // @IsArray()
+    // @ValidateNested({each:true})
+    // @ArrayMinSize(1)
     @Type(()=>CreatePlanificationDTO)
     planification:CreatePlanificationDTO[];
 }
+

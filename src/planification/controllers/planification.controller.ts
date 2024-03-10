@@ -7,15 +7,42 @@ import { PlanificationService } from "../services";
 import { UpdateStatePlanificationDTO } from "../dtos";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 
-@Controller("planification")
+@Controller("planifications")
 export class PlanificationController
 {
     constructor(
         private planificationService:PlanificationService,
-        private usersService:UsersService
         ){}
 
-     
+    /**
+     * 
+     * @api {get} /planification/ Obtention des planifications de l'utilisateur connecté
+     * @apiDescription Obtention des contacts de l'utilisateur connecté
+     * @apiName Obtention des contacts de l'utilisateur connecté
+     * @apiGroup Gestion de contact
+     * @apiUse apiSecurity
+     * @apiUse apiDefaultResponse
+     * 
+     * @apiSuccess (200 Ok) {Number} statusCode status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Array} data response data
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiUse apiError
+     * 
+     */
+    @Get()
+    async getAllUserContact(@Req() request:Request)
+    {
+        let plans = await this.planificationService.findByField({"owner.email":request["user"]["email"]});
+        return {
+            statusCode:HttpStatus.OK,
+            message:"List des plannifications de l'utilisateur courant",
+            data:plans
+        }        
+    }
+
+    
     @Post("state")
     async updatePlanificationState(request:Request, @Body() updatePlanficationState:UpdateStatePlanificationDTO)
     {

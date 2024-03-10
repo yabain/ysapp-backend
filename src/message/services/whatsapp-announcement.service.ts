@@ -4,14 +4,12 @@ import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { WhatsappClientServiceWS } from './whatsapp-client-ws.service';
 import { Message } from '../models';
-const mongoose = require('mongoose');
 
 @Injectable()
 export class WhatsappAnnouncementService {
     clientsWhatsApp: Map<string,WhatsappClientServiceWS> = new Map()
   constructor(
     private userService:UsersService,
-    @InjectConnection() private connection: Connection
     ) {  
   }
 
