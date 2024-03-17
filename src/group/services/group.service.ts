@@ -23,8 +23,10 @@ export class GroupService extends DataBaseService<GroupDocument> {
     const user = await this.usersService.findOneByField({ email: userEmail });
     const group = new this.groupModel(createContactDTO);
     user.groups.push(group);
-    await user.save();
-    return group.save();
+    return this.executeWithTransaction(async (session)=>{
+      await user.save({session});
+      return group.save({session});
+    })
   }
 
   async addContactToGroup(userEmail: string, contactId: string, groupId: string) {
@@ -34,10 +36,10 @@ export class GroupService extends DataBaseService<GroupDocument> {
     contact.groups.push(group);
     group.contacts.push(contact);
 
-    console.log("Contact ",contact)
-    await contact.save();
-    await group.save();
-    return true;
+    return this.executeWithTransaction(async (session)=>{
+      await contact.save({session});
+      return group.save({session});
+    })
   }
 
     

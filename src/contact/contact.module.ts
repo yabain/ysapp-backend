@@ -20,11 +20,9 @@ import { WhatsappAnnouncementService } from "src/message/services";
     ],
     providers:[
         ContactsService,
-        WhatsappAnnouncementService
     ],
     exports:[
-        ContactsService,
-        WhatsappAnnouncementService
+        ContactsService
     ]
 })
 export class ContactModule{}

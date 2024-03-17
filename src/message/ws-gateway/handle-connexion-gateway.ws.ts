@@ -1,7 +1,8 @@
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse, } from '@nestjs/websockets';
 import { MessageService,  } from "../services";
 import { Socket } from 'socket.io'
-import { WhatsappAnnouncementService } from '../services/whatsapp-announcement.service';
+import { WhatsappAnnouncementService } from 'src/shared/services/announcement';
+import { UsersService } from 'src/user/services';
 
 @WebSocketGateway({
     cors: {
@@ -13,10 +14,10 @@ export class HandleConnexionGatewayWS implements OnGatewayConnection, OnGatewayD
 
     constructor(
         private whatsAppAnnouncementService:WhatsappAnnouncementService,
+        private usersService:UsersService
     ){}
     
     handleConnection(client: Socket, ...args: any[]) {
-        console.log("New")
         
         client.emit("connexion")
     }
@@ -37,8 +38,7 @@ export class HandleConnexionGatewayWS implements OnGatewayConnection, OnGatewayD
     {
         try{
             client.data={email};
-            console.log("New Client")
-            let newClient=await this.whatsAppAnnouncementService.getNewClientWhatsAppSession(email);
+            let newClient=await this.whatsAppAnnouncementService.getNewClientWhatsAppSession(await this.usersService.findOneByField({email}));
             newClient.onReady(async ()=>{
                 client.emit('ready')
                 client.emit("info",{contacts:await newClient.getContacts(),profil:await newClient.getProfil()})

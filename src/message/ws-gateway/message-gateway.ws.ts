@@ -2,7 +2,7 @@ import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect,
 // import { MessageService, } from "../../../message/services";
 import { Socket } from 'socket.io'
 import { PostNewMessageDTO } from '../dtos';
-import { WhatsappAnnouncementService } from '../services/whatsapp-announcement.service';
+import { WhatsappAnnouncementService } from '../../shared/services/announcement/whatsapp/whatsapp-announcement.service';
 
 @WebSocketGateway({
     cors: {

@@ -1,4 +1,4 @@
-import { WhatsappAnnouncementService, WhatsappClientServiceWS } from "src/message/services";
+import { WhatsappAnnouncementService, WhatsappClientServiceWS } from "src/shared/services/announcement";
 import { PlanificationDocument } from "../models";
 import { PlanificationService } from "../services";
 import { CronJobTaskService } from "../services/cron-job-task.service";

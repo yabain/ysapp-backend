@@ -27,7 +27,7 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
     //Planification au démarrage de l'application
     async onApplicationBootstrap():Promise<any> {
         //TODO
-        // await this.planifMonth()
+        await this.planifMonth()
     }
 
 

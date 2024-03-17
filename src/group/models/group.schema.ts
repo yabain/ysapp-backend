@@ -20,6 +20,9 @@ export class Group extends Document
 {
     @Prop({required:true,default:""})
     name:string;
+    
+    @Prop({required:true,default:""})
+    icon:string;
 
     @Prop({required:true,default:""})
     description:string;

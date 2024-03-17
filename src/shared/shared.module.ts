@@ -6,6 +6,7 @@ import { SecurityModule } from "./security/security.module";
 import { AuthGuard, KeycloakConnectModule, ResourceGuard, RoleGuard } from "nest-keycloak-connect";
 import { APP_GUARD } from "@nestjs/core";
 import { ScheduleModule } from "@nestjs/schedule";
+import { WhatsappAnnouncementService } from "./services/announcement";
 
 
 @Module({
@@ -35,13 +36,14 @@ import { ScheduleModule } from "@nestjs/schedule";
         }),
     ],    
     providers: [
-      
+      WhatsappAnnouncementService
     ],
     exports:[
       SecurityModule,
       ConfigModule,
       MongooseModule,
       KeycloakConnectModule,
+      WhatsappAnnouncementService
       // ScheduleModule
   ],
 })

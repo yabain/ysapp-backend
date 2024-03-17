@@ -7,14 +7,9 @@ import { DataBaseService } from "src/shared/services/database";
 import { UsersService } from "src/user/services";
 import { PostNewMessageDTO } from "../dtos";
 import { Message, MessageDocument } from "../models";
-import { WhatsappAnnouncementService } from "./whatsapp-announcement.service";
 import { MessageTemplatesService } from "src/message-template/services";
-import { WhatsappClientServiceWS } from "./whatsapp-client-ws.service";
 import { PlanificationService } from "src/planification/services";
-import { Cron } from "@nestjs/schedule";
-import { CronJobTaskService } from "src/planification/services/cron-job-task.service";
-import { SendMessageInDynamicJobUtil } from "src/planification/utils";
-import { ModuleRef } from "@nestjs/core";
+import { WhatsappAnnouncementService, WhatsappClientServiceWS } from "src/shared/services/announcement";
 
 @Injectable()
 export class MessageService extends DataBaseService<MessageDocument>

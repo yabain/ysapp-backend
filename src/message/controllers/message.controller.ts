@@ -1,19 +1,17 @@
-import { Controller, Post, UseGuards, Body, HttpStatus, Req,Get, UnprocessableEntityException, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Controller, Post, Body, HttpStatus, Req,Get, UnprocessableEntityException, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { Request } from "express";
 import { PostNewMessageDTO } from "../dtos";
-import { MessageService, WhatsappAnnouncementService} from "../services";
+import { MessageService} from "../services";
 import { UsersService } from "src/user/services";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import * as path from "path";
-import { plainToClass } from "class-transformer";
-import { CreatePlanificationDTO } from "src/planification/dtos";
+import { WhatsappAnnouncementService } from "src/shared/services/announcement";
 
 @Controller("message")
 export class MessageController
 {
     constructor(
         private messageService:MessageService,
-        private whatsAppAnnouncementService:WhatsappAnnouncementService,
         private usersService:UsersService
         ){}
 

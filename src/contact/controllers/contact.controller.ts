@@ -9,9 +9,8 @@ import { FilesInterceptor } from "@nestjs/platform-express";
 import * as path from "path";
 import { Readable } from "stream";
 import * as Papa from "papaparse"
-import { WhatsappClientServiceWS } from "src/message/services/whatsapp-client-ws.service";
-import { WhatsappAnnouncementService } from "src/message/services";
-import { Contact } from "whatsapp-web.js";
+import { WhatsappClientServiceWS } from "src/shared/services/announcement/whatsapp/whatsapp-client-ws.service";
+import { WhatsappAnnouncementService } from "src/shared/services/announcement";
 
 
 

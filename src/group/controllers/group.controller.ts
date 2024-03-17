@@ -10,7 +10,6 @@ export class GroupController
 {
     constructor(private groupsService:GroupService, private usersService:UsersService){}
 
-    
     /**
      * 
      * @api {get} /groups/ Obtention des groups de contacts
@@ -136,7 +135,7 @@ export class GroupController
      * 
      */
     @Get(":idGroup/contacts")
-    async getAllllGroupContact(@Param("idGroup",ObjectIDValidationPipe) idGroup:string)
+    async getAllGroupContact(@Param("idGroup",ObjectIDValidationPipe) idGroup:string)
     {
         let data=await this.groupsService.findOneByField({"_id":idGroup})
         if(!data) throw new NotFoundException({

@@ -32,10 +32,8 @@ import { PlanificationModule } from 'src/planification/planification.module';
     MessageGateWayWS,
     HandleConnexionGatewayWS,
   
-    // WhatsappAnnouncementService
   ],
   exports: [
-    // WhatsappAnnouncementService
 
   ],
 })

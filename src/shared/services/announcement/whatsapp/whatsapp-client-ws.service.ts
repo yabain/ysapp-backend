@@ -1,17 +1,15 @@
 import { Injectable } from '@nestjs/common'; 
 import { ConfigService } from '@nestjs/config';
-import { Message, MessageType } from '../models';
-import { CountryInfo, MessageProcessing } from '../utils';
+import { Message, MessageType } from '../../../../message/models';
+import { CountryInfo, MessageProcessing } from '../../../../message/utils';
 import { User, UserDocument } from 'src/user/models';
 import { Client,  Contact,  LocalAuth, MessageMedia, RemoteAuth } from 'whatsapp-web.js';
-import { UsersService } from 'src/user/services';
-import { ContactExtractData } from '../utils/contact-extract-data';
+import { ContactExtractData } from '../../../../message/utils/contact-extract-data';
 
 export class WhatsappClientServiceWS {
   clientWhatsApp: any = null;  
 
   constructor(
-    private userService:UsersService,
     private user:UserDocument=null
     ) {  
   }

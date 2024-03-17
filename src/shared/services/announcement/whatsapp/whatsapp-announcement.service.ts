@@ -3,31 +3,30 @@ import { UsersService } from 'src/user/services';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { WhatsappClientServiceWS } from './whatsapp-client-ws.service';
-import { Message } from '../models';
+import { Message } from '../../../../message/models';
+import { ModuleRef } from '@nestjs/core';
+import { UserDocument } from 'src/user/models';
 
 @Injectable()
 export class WhatsappAnnouncementService {
     clientsWhatsApp: Map<string,WhatsappClientServiceWS> = new Map()
   constructor(
-    private userService:UsersService,
-    ) {  
-  }
+    ) { }
 
-  async getNewClientWhatsAppSession(userEmail)
+  async getNewClientWhatsAppSession(userDocument:UserDocument)
   {
-    let userFound = await this.userService.findOneByField({email:userEmail});
-    // console.log("userFound ",userFound.email,this.clientsWhatsApp.has(userFound._id.toString()))
-    if(this.clientsWhatsApp.has(userEmail)) this.removeClient(userEmail);
+    if(!userDocument) return null;
+    if(this.clientsWhatsApp.has(userDocument.email)) this.removeClient(userDocument.email);
 
-    let newWhatsappClient = new WhatsappClientServiceWS(this.userService,userFound);
+    let newWhatsappClient = new WhatsappClientServiceWS(userDocument);
     await newWhatsappClient.getWhatsAppSession()
-    this.clientsWhatsApp.set(userEmail,newWhatsappClient);
+    this.clientsWhatsApp.set(userDocument.email,newWhatsappClient);
     return newWhatsappClient;
   }
 
   async sendMessage(message:Message,sender):Promise<boolean>
   {
-    let client =await this.getNewClientWhatsAppSession(sender.email);
+    let client =await this.getNewClientWhatsAppSession(sender);
     return client.sendMessage(message,sender)
   }
 
