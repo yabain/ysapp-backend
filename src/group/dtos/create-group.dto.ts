@@ -1,4 +1,5 @@
-import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, Matches, IsPhoneNumber } from "class-validator";
+import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, Matches, IsPhoneNumber, IsMongoId } from "class-validator";
+import { ObjectId } from "mongoose";
 
 
 /**
@@ -25,5 +26,9 @@ export class CreateGroupDTO
     @IsString()
     @IsUrl()
     profilePicture:string;
+
+    @IsOptional()
+    @IsMongoId({each:true})
+    contacts: ObjectId[];
 
 }

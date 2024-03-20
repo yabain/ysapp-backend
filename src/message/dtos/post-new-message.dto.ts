@@ -29,8 +29,7 @@ export class PostNewMessageDTO
     contactsID: any; //ObjectId[] | string
 
     @IsOptional()
-    @IsMongoId({each:true})
-    groupsID:ObjectId[];
+    groupsID:any; //ObjectId[];
 
     @IsString()
     isSentToNow:boolean;

@@ -96,10 +96,10 @@ export class MessageController
     }))   
     async postNewMessage(@UploadedFiles() files:Express.Multer.File[],@Req() request:Request, @Body() postNewMessageDTO:PostNewMessageDTO,)
     {
-        postNewMessageDTO.contactsID = postNewMessageDTO.contactsID.split(",")
-        // postNewMessageDTO.planification = postNewMessageDTO.planification.map((plan)=> plainToClass(CreatePlanificationDTO,plan)) 
+        if(postNewMessageDTO.contactsID) postNewMessageDTO.contactsID = postNewMessageDTO.contactsID.split(",")
+        if(postNewMessageDTO.groupsID) postNewMessageDTO.groupsID = postNewMessageDTO.groupsID.split(",")
+
         if(files.length>0) postNewMessageDTO.bodyFiles=files
-        // console.log("Post DTO ",postNewMessageDTO,postNewMessageDTO.planification);
 
         return {
             statusCode:HttpStatus.OK,

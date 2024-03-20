@@ -10,6 +10,7 @@ import { DateUtil, SendMessageInDynamicJobUtil } from "../utils";
 import { CronJobTaskService } from "./cron-job-task.service";
 import { Cron } from "@nestjs/schedule";
 import { ModuleRef } from "@nestjs/core";
+import { WhatsappAnnouncementService } from "src/shared/services/announcement";
 
 
 @Injectable()
@@ -19,6 +20,7 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
         @InjectModel(Planification.name)  planificationModel: Model<PlanificationDocument>,
         @InjectConnection() connection: mongoose.Connection,
         private cronJobTaskService:CronJobTaskService,
+        private whatsAppAnnouncementService:WhatsappAnnouncementService,
         private moduleRef:ModuleRef
     ){
         super(planificationModel, connection,["message"]);
@@ -37,7 +39,7 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
     {
         let allPlanification = await this.findByField({isActive:true,"owner.hasSyncWhatsApp":true});
         allPlanification.map((plan)=>{
-            SendMessageInDynamicJobUtil.createJobToSendMessage(this.moduleRef,plan)
+            SendMessageInDynamicJobUtil.createJobToSendMessage(this,this.whatsAppAnnouncementService,this.cronJobTaskService,plan)
         })
     }
 
@@ -58,11 +60,8 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
         planification.isActive=updatePlanficationDTO.status;
         if(updatePlanficationDTO.status)
         {
-            if(!this.cronJobTaskService.jobExist(this.cronJobTaskService.generateNewJobName(planification.owner)))
-            {
-                // SendMessageInDynamicJobUtil.createJobToSendMessage(this,planification,this.whatsAppAnnoucementService,this.cronJobTaskService)
-                SendMessageInDynamicJobUtil.createJobToSendMessage(this.moduleRef,planification)
-            }
+            if(!this.cronJobTaskService.jobExist(this.cronJobTaskService.generateNewJobName(planification.owner))) 
+                SendMessageInDynamicJobUtil.createJobToSendMessage(this,this.whatsAppAnnouncementService,this.cronJobTaskService,planification)
             else planification.planning.forEach((plan)=>this.cronJobTaskService.removeJobTask(plan.subJobId)) 
         }
         return planification.save();

@@ -238,23 +238,15 @@ export class GroupController
      * 
      */
     @Put(":id")
-    async updateGroupById(@Req() request:Request, @Param("id",ObjectIDValidationPipe) id:string,updateGroupDTO:UpdateGroupDTO)
+    async updateGroupById(@Req() request:Request, @Param("id",ObjectIDValidationPipe) id:string, @Body() updateGroupDTO:UpdateGroupDTO)
     {
-        let data=await this.groupsService.findOneByField({"_id":id})
-        if(!data) throw new NotFoundException({
-            statusCode: 404,
-            error:"ContactGroup/NotFound",
-            message:["Contact group not found"]
-        })
-
-        data=await this.groupsService.update({"_id":id},updateGroupDTO);
+        let data = await this.groupsService.updateGroup(id,updateGroupDTO)
         return {
             statusCode:HttpStatus.OK,
             message:"Group updated successfully",
             data
         }
     }
-
     /**
      * 
      * @api {delete} /groups/:idGroup/:idGroupToTransfert Suppression de groupe

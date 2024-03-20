@@ -1,12 +1,13 @@
-import { Module } from "@nestjs/common";
+import { Global, Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { UserModule } from "src/user/user.module";
 import { ContactController } from "./controllers";
 import { Contact, ContactEmail, ContactEmailSchema, ContactSchema, PhoneNumber, PhoneNumberSchema } from "./models";
 import { ContactsService } from "./services";
 import { GroupModule } from "src/group";
-import { WhatsappAnnouncementService } from "src/message/services";
+import { SharedModule } from "src/shared/shared.module";
 
+@Global()
 @Module({
     controllers:[ContactController],
     imports:[
@@ -16,7 +17,8 @@ import { WhatsappAnnouncementService } from "src/message/services";
             // {name:PhoneNumber.name,schema:PhoneNumberSchema},
         ]),
         UserModule,
-        GroupModule
+        GroupModule,
+        SharedModule
     ],
     providers:[
         ContactsService,

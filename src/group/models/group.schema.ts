@@ -21,7 +21,7 @@ export class Group extends Document
     @Prop({required:true,default:""})
     name:string;
     
-    @Prop({required:true,default:""})
+    @Prop({default:""})
     icon:string;
 
     @Prop({required:true,default:""})
@@ -39,5 +39,6 @@ export class Group extends Document
     @Prop({default:Date.now(),required:true})
     createdAt:Date
 }
+
 
 export const GroupSchema = SchemaFactory.createForClass(Group)

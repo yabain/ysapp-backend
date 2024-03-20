@@ -132,6 +132,7 @@ export class WhatsappClientServiceWS {
       resolve(contacts)
     })    
   }
+  
 
   getProfil()
   {
