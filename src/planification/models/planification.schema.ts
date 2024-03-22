@@ -16,7 +16,7 @@ export type PlanificationType = {
   dayOfWeek?:number,
   monthOfYear?:number,
   date?:Date,
-  subJobId:string,
+  subJobId?:string,
   dates?:Date[]
 }
 
@@ -57,13 +57,12 @@ export class Planification extends Document{
           dayOfWeek:0,
           monthOfYear:0,
           date:new Date(),
-          subJobId:"",
+          subJobId:0,
           dates:[]
         }
       }]
     })
     planning:PlanificationType[]
-
   
     @Prop({default:true})
     isActive:Boolean;

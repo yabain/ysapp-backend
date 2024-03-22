@@ -6,17 +6,15 @@ import { User } from "src/user/models";
 export class CronJobTaskService
 {
 
-    constructor(private schedulerRegistry: SchedulerRegistry,
-        ){}
+    constructor(private schedulerRegistry: SchedulerRegistry){}
 
     newJobTask(task:(params)=>void,params,plan:string,planName:string)
     {
         // console.log("Task Scheduler start",plan,planName,params,task)
         let job = new CronJob(plan, ()=>{
-            console.log("Task Scheduled")
             task(params);
         });
-        // console.log("Job ",job)
+        console.log("Job ",planName,plan)
         this.schedulerRegistry.addCronJob(planName,job);
         job.start();        
     }

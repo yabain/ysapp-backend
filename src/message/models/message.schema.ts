@@ -4,15 +4,15 @@ import { Contact } from "src/contact/models";
 import { Group } from "src/group/models";
 import { User } from "src/user/models";
 
-export type MessageDocument = HydratedDocument<Message>;
-
 export enum MessageType {
   TEXT="text",
   IMAGE = "image",
   DOCUMENT = "document",
-  CONTACT = "contact" 
+  CONTACT = "contact",
 }
 
+
+export type MessageDocument = HydratedDocument<Message>;
 
 @Schema({
     toObject: {
@@ -60,4 +60,4 @@ export class Message extends Document
     title:string
 }
 
-export const MessageSchema = SchemaFactory.createForClass(Message)
+export const MessageSchema = SchemaFactory.createForClass(Message);

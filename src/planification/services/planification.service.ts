@@ -3,7 +3,7 @@ import { InjectModel, InjectConnection } from "@nestjs/mongoose";
 import mongoose, { Model } from "mongoose";
 import { DataBaseService } from "src/shared/services/database";
 import { Planification, PlanificationDocument, PlanificationType } from "../models";
-import { CreatePlanificationDTO, UpdateStatePlanificationDTO } from "../dtos";
+import { CreatePlanificationDTO, UpdatePlanificationDTO, UpdateStatePlanificationDTO } from "../dtos";
 import { Message } from "src/message/models";
 import { CRON_JOB_RECCURENT_TYPE, CRON_JOB_TYPE } from "../enums";
 import { DateUtil, SendMessageInDynamicJobUtil } from "../utils";
@@ -44,27 +44,32 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
     }
 
     
-    newPlanification(createPlanificationDTO:CreatePlanificationDTO[],message:Message,title:string)
+    async newPlanification(createPlanificationDTO:any[],message:Message,title:string,session=null)
     {
-        return this.create({owner:message.sender,message,planning:createPlanificationDTO,title})
+        let planif= await this.create({owner:message.sender,message,title},session)
+        return this.update({_id:planif._id},{planning:[...createPlanificationDTO]},session);
     }
 
-    async updatePlanfication(updatePlanficationDTO:UpdateStatePlanificationDTO)
+    async updatePlanfication(updatePlanficationDTO:UpdatePlanificationDTO,planificationID)
     {
-        let planification = await this.findOneByField({_id:updatePlanficationDTO.planificationID});
+        let planification = await this.findOneByField({_id:planificationID});
         if(!planification) throw new NotFoundException({
             statusCode: 404,
             error:"Planification/NotFound",
             message:["Planification not found"]
         })
-        planification.isActive=updatePlanficationDTO.status;
-        if(updatePlanficationDTO.status)
+        planification = await this.update({_id:planification._id},updatePlanficationDTO)
+        console.log("Update object ",updatePlanficationDTO)
+        // if(updatePlanficationDTO.hasOwnProperty("isActive")) planification.isActive=updatePlanficationDTO.isActive;
+        if( updatePlanficationDTO.isActive)
         {
-            if(!this.cronJobTaskService.jobExist(this.cronJobTaskService.generateNewJobName(planification.owner))) 
-                SendMessageInDynamicJobUtil.createJobToSendMessage(this,this.whatsAppAnnouncementService,this.cronJobTaskService,planification)
-            else planification.planning.forEach((plan)=>this.cronJobTaskService.removeJobTask(plan.subJobId)) 
+            planification.planning.forEach((plan)=>{                
+                if(!this.cronJobTaskService.jobExist(plan.subJobId)) SendMessageInDynamicJobUtil.createJobToSendMessage(this,this.whatsAppAnnouncementService,this.cronJobTaskService,planification) 
+            })
+            
+            // else planification.planning.forEach((plan)=>this.cronJobTaskService.removeJobTask(plan.subJobId)) 
         }
-        return planification.save();
+        return planification.populate("message");
     }    
 
     async removePlanification(planificationID:string)
@@ -80,7 +85,7 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
         })
         return this.executeWithTransaction(async (session)=>{
             await planification.message.delete({session})
-            await this.delete({_id:planificationID},{session});
+           return await this.delete({_id:planificationID},session);
             
         })
     }
@@ -125,7 +130,6 @@ export class PlanificationService extends DataBaseService<PlanificationDocument>
         else cronString+=` * ${firstDayOfEndDateMonth.getMonth()} *`;
         return cronString;
     }
-
 
     transformReccurentPlanificationToCronJobString(planning:PlanificationType)
     {

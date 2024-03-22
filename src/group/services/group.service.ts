@@ -30,7 +30,7 @@ export class GroupService extends DataBaseService<GroupDocument> {
     {
       listOfContact = await Promise.all(createContactDTO.contacts.map((contactID)=>this.contactService.findOneByField({_id:contactID})))
     }
-
+    
     return this.executeWithTransaction(async (session)=>{
 
       const group = await this.create(createContactDTO,session);

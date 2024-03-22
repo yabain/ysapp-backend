@@ -15,6 +15,6 @@ export class SendMessageInDynamicJobUtil
             let userWhatsappSync:WhatsappClientServiceWS = whatsappAnnoucementService.clientsWhatsApp.get(message.sender.email);
             if(await userWhatsappSync.isConnected()) await userWhatsappSync.sendMessage(message,message.sender)
             else userWhatsappSync.onReady(()=>userWhatsappSync.sendMessage(message,message.sender))
-        },cronJobTaskService.generateNewJobName(planificationObject.owner))
+        })
     }
 }

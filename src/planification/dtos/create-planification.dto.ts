@@ -1,6 +1,7 @@
-import { ArrayMinSize, IsArray, IsDate, IsDateString, IsEnum, IsIn, IsNumber, IsOptional, IsPositive, IsString, Max, Min } from "class-validator"
+import { ArrayMinSize, IsArray, IsBoolean, IsDate, IsDateString, IsEnum, IsIn, IsNumber, IsOptional, IsPositive, IsString, Max, Min } from "class-validator"
 import { CRON_JOB_RECCURENT_TYPE, CRON_JOB_TYPE, ListOfDay, ListOfMonth } from "../enums"
 import { Transform } from "class-transformer";
+import { Optional } from "@nestjs/common";
 
 export class CreatePlanificationDTO
 {
@@ -53,4 +54,8 @@ export class CreatePlanificationDTO
     @Transform(({value})=> value.map(date=>new Date(value)))
     @IsDateString({},{each:true})
     dates:Date[];
+
+    @Optional()
+    @IsBoolean()
+    isActive:boolean
 }

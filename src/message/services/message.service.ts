@@ -10,6 +10,7 @@ import { Message, MessageDocument } from "../models";
 import { MessageTemplatesService } from "src/message-template/services";
 import { PlanificationService } from "src/planification/services";
 import { WhatsappAnnouncementService, WhatsappClientServiceWS } from "src/shared/services/announcement";
+import { CronJobTaskService } from "src/planification/services/cron-job-task.service";
 
 @Injectable()
 export class MessageService extends DataBaseService<MessageDocument>
@@ -22,16 +23,18 @@ export class MessageService extends DataBaseService<MessageDocument>
         private contactService:ContactsService,
         private groupService:GroupService,
         private planificationService:PlanificationService,
-        private messageTemplateService:MessageTemplatesService        ){
+        private cronJobTaskService:CronJobTaskService,
+        private messageTemplateService:MessageTemplatesService        
+        ){
         super(messageModel, connection);
 
         }
         
     async postNewMessage(postNewMessage:PostNewMessageDTO,user)
     {
-        let message = await this.getMessageToSend(postNewMessage,await this.userService.findOneByField({"email":user.email}))
-
-        let userWhatsappSync:WhatsappClientServiceWS = this.whatsappAnnoucementService.clientsWhatsApp.get(message.sender.email);
+        let message = await this.getMessageToSend(postNewMessage,await this.userService.findOneByField({"email":user.email})),
+         planif=null,
+         userWhatsappSync:WhatsappClientServiceWS = this.whatsappAnnoucementService.clientsWhatsApp.get(message.sender.email);
         
         // console.log("UserWhatsappSync ",userWhatsappSync)
         if(message.isSentToNow) {
@@ -43,15 +46,22 @@ export class MessageService extends DataBaseService<MessageDocument>
             await userWhatsappSync.sendMessage(message,user)
         }
         else {
-            await message.save();
-            this.planificationService.applyOnCronJob(
-                await this.planificationService.newPlanification(postNewMessage.planification,message,postNewMessage.title),
-                ()=>{
-                    userWhatsappSync.sendMessage(message,user);
-                }
-            );
+            await this.executeWithTransaction(async (session)=>{
+                await message.save({session});
+                planif = await this.planificationService.newPlanification(
+                    postNewMessage.planification.map((plan)=>({...plan,subJobId:this.cronJobTaskService.generateNewJobName(message.sender)})),
+                    message,
+                    postNewMessage.title,
+                    session
+                )
+                console.log("Planif ",planif)
+                this.planificationService.applyOnCronJob(
+                    planif,
+                    ()=>userWhatsappSync.sendMessage(message,user)
+                );
+            })
         }
-        return message;
+        return  planif.populate("message");
     }
 
     async getMessageToSend(postNewMessage:PostNewMessageDTO,sender)
@@ -60,7 +70,7 @@ export class MessageService extends DataBaseService<MessageDocument>
         message.sender = sender;
         // console.log("message.sender ",message.sender,await this.userService.findOneByField({"email":email}),email)
         message.type = postNewMessage.type;
-        message.isSentToNow = postNewMessage.isSentToNow;
+        message.isSentToNow = postNewMessage.isSentToNow;        
         // console.log("postNewMessage.body",postNewMessage.body)
         
         if(postNewMessage.messageTemplateId)
@@ -86,7 +96,7 @@ export class MessageService extends DataBaseService<MessageDocument>
         if(postNewMessage.groupsID) message.groups = await Promise.all(postNewMessage.groupsID.map((groupId)=>this.groupService.findOneByField({"_id":groupId})));
         message.groups.forEach((group)=>message.contacts=[...message.contacts,...group.contacts])
         if(postNewMessage.dateToSend) message.dateToSend = postNewMessage.dateToSend;       
-        
+        if(postNewMessage.title) message.title=postNewMessage.title
         return message;
         
     }

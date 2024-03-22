@@ -4,7 +4,7 @@ import { UsersService } from "src/user/services";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import * as path from "path";
 import { PlanificationService } from "../services";
-import { UpdateStatePlanificationDTO } from "../dtos";
+import { UpdatePlanificationDTO, UpdateStatePlanificationDTO } from "../dtos";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 
 @Controller("planifications")
@@ -43,16 +43,17 @@ export class PlanificationController
     }
 
     
-    @Post("state")
-    async updatePlanificationState(request:Request, @Body() updatePlanficationState:UpdateStatePlanificationDTO)
+    @Put(":planificationID")
+    async updatePlanification(@Param("planificationID",ObjectIDValidationPipe) planificationID:string, @Body() updatePlanfication:UpdatePlanificationDTO)
     {
-        await this.planificationService.updatePlanfication(updatePlanficationState);
         return {
             statusCode:HttpStatus.OK,
             message:"Etat status de la synchronisation modifié avec success",
+            data: await this.planificationService.updatePlanfication(updatePlanfication,planificationID)
         }
     }
-
+    
+    
     @Delete(':planificationID')
     async removePlanification(@Param("planificationID",ObjectIDValidationPipe) planificationID:string)
     {
