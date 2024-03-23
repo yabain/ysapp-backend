@@ -1,7 +1,8 @@
-import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, IsArray, ArrayMinSize, IsMobilePhone, IsFQDN, IsDate, Max, IsEmail, ValidateNested } from "class-validator";
+import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, IsArray, ArrayMinSize, IsMobilePhone, IsFQDN, IsDate, Max, IsEmail, ValidateNested, IsMongoId } from "class-validator";
 import { Transform, Type } from "class-transformer";
 import { PhoneNumberDTO } from "./phone-number.dto";
 import { ContactEmailDTO } from "./contact-email.dto";
+import { ObjectId } from "mongoose";
 
 
 /**
@@ -83,4 +84,8 @@ export class CreateContactDTO
     @Transform(({value})=> value && new Date(value))
     @IsDate()
     birthday:Date;
+
+    @IsOptional()
+    @IsMongoId({each:true})
+    groups: ObjectId[];
 }

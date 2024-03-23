@@ -60,15 +60,26 @@ export class GroupService extends DataBaseService<GroupDocument> {
     }
 
     return this.executeWithTransaction(async (session)=>{
+      let listOfOldContact = (await group.populate("contacts")).contacts;
 
-      let data =await this.update({"_id":id},{...updateGroupDTO,contats:listOfContact.map((value)=>value._id)},session)
+      let listOfOldContactGroupToRemoved = listOfOldContact.filter((oContact)=>!listOfContact.some((nContact)=>nContact._id==oContact._id)),
+      listOfNewContactGroupToAdd = listOfContact.filter((nContact)=>!listOfOldContact.some((oContact)=>nContact._id==oContact._id));
 
-      await Promise.all(listOfContact.map((contact)=>{
-        if(contact.groups.findIndex((fgroup)=>fgroup._id!=group.id)) contact.groups.push(group);
+      group =await this.update({"_id":id},{...updateGroupDTO,contats:listOfContact.map((value)=>value._id)},session)
+
+      await Promise.all(listOfOldContactGroupToRemoved.map((contact)=>{
+        let groupPos = contact.groups.findIndex((fgroup)=>fgroup._id!=group.id)
+        if(groupPos>-1) contact.groups.splice(groupPos,1);
         return contact.save({session})
       }))
 
-      return data
+
+      await Promise.all(listOfNewContactGroupToAdd.map((contact)=>{
+        contact.groups.push(group);
+        return contact.save({session})
+      }))
+
+      return group
     })
 
 

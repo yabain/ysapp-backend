@@ -63,7 +63,7 @@ export class MessageService extends DataBaseService<MessageDocument>
         }
         return  planif.populate("message");
     }
-
+    
     async getMessageToSend(postNewMessage:PostNewMessageDTO,sender)
     {
         let message = this.createInstance({});

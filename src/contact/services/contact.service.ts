@@ -13,19 +13,12 @@ export class ContactsService extends DataBaseService<ContactDocument>
     
     constructor(@InjectModel(Contact.name) private contactModel:Model<ContactDocument>,
         @InjectConnection() connection:Connection,
-        private usersService:UsersService
+        private usersService:UsersService,
         ){
         super(contactModel,connection);
     }
 
-    async createNewContact(createContactDTO: CreateContactDTO,email:string):Promise<ContactDocument>
-    {
-        let user= await this.usersService.findOneByField({email});
-        let contact = new this.contactModel(createContactDTO);
-        user.contacts.push(contact);
-        await user.save()
-        return contact.save();
-    }
+   
 
     async createBulkContact(
         data: {

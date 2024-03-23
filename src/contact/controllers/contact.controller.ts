@@ -66,7 +66,31 @@ export class ContactController
     @Post()    
     async addContact(@Req() request:Request, @Body() createContactDTO:CreateContactDTO)
     {
-        let data=await this.contactsService.createNewContact(createContactDTO,request["user"]['email'])
+        let email=request["user"]['email'];
+
+        let user= await this.usersService.findOneByField({email});
+        let listOfGroup=[]
+        if(createContactDTO.groups && createContactDTO.groups.length>0)
+        {
+            listOfGroup = await Promise.all(createContactDTO.groups.map((groupID)=>this.groupService.findOneByField({_id:groupID})))
+        }
+
+        
+        let data = await  this.contactsService.executeWithTransaction(async (session)=>{
+            let contact = await this.contactsService.create(createContactDTO,session);
+            user.contacts.push(contact);
+            await Promise.all(listOfGroup.map((group)=>{
+                group.contacts=[...group.contacts,contact];
+                return group.save({session})
+              }))
+            
+            contact.groups=[...listOfGroup.map((contact)=>contact._id)];
+
+            await user.save({session})
+            return contact.save({session});
+        })
+
+        
         return {
             statusCode:HttpStatus.CREATED,
             message:"Contact add successfully",
@@ -222,7 +246,7 @@ export class ContactController
     @Get(":id")    
     async getContactById(@Req() request:Request, @Param("id",ObjectIDValidationPipe) id:string)
     {
-        let data=await this.contactsService.findOneByField({"_id":id})
+        let data=await this.contactsService.findOneByField({"_id":id});
         return {
             statusCode:HttpStatus.OK,
             message:"Contact details",
@@ -271,13 +295,44 @@ export class ContactController
     @Put(":id")
     async updateContactById(@Req() request:Request, @Param("id",ObjectIDValidationPipe) id:string,@Body() updateContactDTO:UpdateContactDTO)
     {
-        let data=await this.contactsService.update({"_id":id},updateContactDTO)
-        return {
-            statusCode:HttpStatus.OK,
-            message:"Contact updated successfully",
-            data
+        let contact = await this.contactsService.findOneByField({_id:id});
+        if(!contact) throw new NotFoundException({
+            statusCode: 404,
+            error:"Contact/NotFound",
+            message:["Contact group not found"]
+        })
+
+        let listOfGroup=[]
+        if(updateContactDTO.groups && updateContactDTO.groups.length>0)
+        {
+            listOfGroup = await Promise.all(updateContactDTO.groups.map((groupID)=>this.groupService.findOneByField({_id:groupID})))
         }
+
+        return this.contactsService.executeWithTransaction(async (session)=>{
+
+            let listOfOldGroup = (await contact.populate("groups")).groups;
+
+            let listOfOldContactGroupToRemoved = listOfOldGroup.filter((oContact)=>!listOfGroup.some((nContact)=>nContact._id==oContact._id)),
+            listOfNewContactGroupToAdd = listOfGroup.filter((nContact)=>!listOfOldGroup.some((oContact)=>nContact._id==oContact._id));
+
+            contact =await this.contactsService.update({"_id":id},{...updateContactDTO,groups:listOfGroup.map((value)=>value._id)},session)
+      
+            await Promise.all(listOfOldContactGroupToRemoved.map((group)=>{
+                let contactPos = group.contacts.findIndex((fcontact)=>fcontact._id!=contact.id)
+                if(contactPos>-1) group.contacts.splice(contactPos,1);
+                return group.save({session})
+              }))
+        
+        
+              await Promise.all(listOfNewContactGroupToAdd.map((group)=>{
+                group.contacts.push(contact);
+                return contact.save({session})
+              }))
+      
+            return contact
+          })
     }
+
 
     /**
      * 
